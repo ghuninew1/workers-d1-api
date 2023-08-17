@@ -51,8 +51,73 @@ app.get('/api/data', async c => {
 
 app.get('/api/data/:name', async c => {
 	const { name } = c.req.param();
-	const response = await c.env.DB.prepare(`SELECT * from data where id =${name}`).all();
+	const response = await c.env.DB.prepare(`SELECT * from data where post_id = ?`)
+	.bind(name)
+	.all();
 	return c.json(response);
+});
+
+app.post('/api/data', async c => {
+	const { name, alt, imag } = await c.req.json<{ name: string; alt: string; imag: string }>();
+
+	if (!name) return c.text('Missing name value for new data');
+	if (!alt) return c.text('Missing alt value for new data');
+	if (!imag) return c.text('Missing imag value for new data');
+
+	const { success } = await c.env.DB.prepare(
+		`insert into data (name, alt, imag) values (?, ?, ?); `
+	)
+		.bind(name, alt, imag)
+		.run();
+
+	if (success) {
+		c.status(201);
+		return c.text('Created');
+	} else {
+		c.status(500);
+		return c.text('Something went wrong');
+	}
+});
+
+app.put('/api/data/:name', async c => {
+	const { name } = c.req.param();
+	const { alt, imag } = await c.req.json<{ alt: string; imag: string }>();
+
+	if (!alt) return c.text('Missing alt value for new data');
+	if (!imag) return c.text('Missing imag value for new data');
+
+	const { success } = await c.env.DB.prepare(
+		`update data set alt = ?, imag = ? where post_id = ?;`
+	)
+		.bind(alt, imag, name)
+		.run();
+
+	if (success) {
+		c.status(200);
+		return c.text('Updated');
+
+	} else {
+		c.status(500);
+		return c.text('Something went wrong');
+	}
+});
+
+app.delete('/api/data/:name', async c => {
+	const { name } = c.req.param();
+
+	const { success } = await c.env.DB.prepare(
+		`delete from data where post_id = ?;`
+	)
+		.bind(name)
+		.run();
+
+	if (success) {
+		c.status(200);
+		return c.text('Deleted');
+	} else {
+		c.status(500);
+		return c.text('Something went wrong');
+	}
 });
 
 app.get('/api/posts', async c => {
@@ -61,11 +126,7 @@ app.get('/api/posts', async c => {
 	)
 		.bind()
 		.all();
-	return new Response(JSON.stringify(results), {
-		headers: {
-			'content-type': 'application/json;charset=UTF-8',
-		},
-	});
+		return c.json(results);
 });
 
 app.get('/api/posts/:slug/comments', async c => {
