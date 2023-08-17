@@ -1,0 +1,8 @@
+name = "workers01"
+main = "src/index.ts"
+compatibility_date = "2022-07-15"
+
+[[ d1_databases ]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "workers01"
+database_id = "e2be0d18-ec48-4d05-9529-29d50afedf56"
