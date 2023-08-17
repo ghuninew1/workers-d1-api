@@ -59,7 +59,7 @@ npx wrangler d1 backup create northwind-demo
 mkdir -p wrangler-local-state/d1
 
 # Copy the `id` of the backup, and download the backup into that directory
-npx wrangler d1 backup download northwind-demo <backup-id> --output ./wrangler-local-state/d1/DB.sqlite3
+npx wrangler d1 backup download northwind-demo 8a095b42-3932-417d-8995-1ee11b4d6082 --output ./wrangler-local-state/d1/DB.sqlite3
 
 # Then run wrangler dev --local with persistence
 npx wrangler dev --local --experimental-enable-local-persistence
