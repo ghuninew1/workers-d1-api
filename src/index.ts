@@ -49,25 +49,28 @@ app.get('/api/data', async c => {
 	return c.json(results);
 });
 
-app.get('/api/data/:name', async c => {
-	const { name } = c.req.param();
-	const response = await c.env.DB.prepare(`SELECT * from data where post_id = ?`)
-	.bind(name)
-	.all();
-	return c.json(response);
+app.get('/api/data/:slug/data', async c => {
+	const { slug } = c.req.param();
+	const { results } = await c.env.DB.prepare(
+		`SELECT * from data where post_id = ?; `
+	)
+		.bind(slug)
+		.all();
+	return c.json(results);
 });
 
 app.post('/api/data', async c => {
-	const { name, alt, imag } = await c.req.json<{ name: string; alt: string; imag: string }>();
+	const { name, alt, imag, post_id } = await c.req.json<{ name: string; alt: string; imag: string; post_id: string }>();
 
 	if (!name) return c.text('Missing name value for new data');
 	if (!alt) return c.text('Missing alt value for new data');
 	if (!imag) return c.text('Missing imag value for new data');
+	if (!post_id) return c.text('Missing post_id value for new data');
 
 	const { success } = await c.env.DB.prepare(
-		`insert into data (name, alt, imag) values (?, ?, ?); `
+		`insert into data (name, alt, imag, post_id) values (?, ?, ?, ?); `
 	)
-		.bind(name, alt, imag)
+		.bind(name, alt, imag, post_id)
 		.run();
 
 	if (success) {
