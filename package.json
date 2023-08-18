@@ -1,18 +1,13 @@
 {
-	"name": "@ghuninew1/workers-d1-api",
-	"version": "1.0.0",
-	"devDependencies": {
-		"@cloudflare/d1": "^1.4.1",
-		"@cloudflare/workers-types": "^4.2.0",
-		"hono": "^3.4.3",
-		"typescript": "^5.1.6",
-		"wrangler": "^3.5.1"
-	},
-	"private": true,
-	"scripts": {
-		"start": "wrangler dev",
-		"deploy": "export NO_D1_WARNING=true && wrangler deploy",
-		"build": "wrangler build",
-		"publish": "wrangler publish"
-	}
+  "name": "@ghuninew1/workers-d1-api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "itty-router": "^4.0.17",
+    "wrangler": "^3.5.1"
+  }
 }
