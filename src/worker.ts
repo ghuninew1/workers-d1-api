@@ -39,8 +39,8 @@ app.post('/api/:name_db', async (c: any) => CreateTask(c));
 app.put('/api/:name_db/:post_id', async (c: any) => updateTask(c));
 app.delete('/api/:name_db/:post_id', async (c: any) => deleteTask(c));
 app.delete('/api/:name_db', async (c: any) => deleteAllTask(c));
-app.get('/api/:name', (c: any) => CreateNewDatabase(c));
-app.get('/api/:name', (c: any) => DeleteDatabase(c));
+app.post('/api/:name', (c: any) => CreateNewDatabase(c));
+app.delete('/api/:name', (c: any) => DeleteDatabase(c));
 app.get('/status', (c: any) => getStatus(c));
 app.get('/', (c: any) => getStatus(c));
 
