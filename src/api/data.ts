@@ -13,8 +13,9 @@ export const jsonReply = async (json: String, status: any = 200) => {
 
 //export app CreateTask for use in worker.ts
 export const CreateTask = async (c: any) => {
+    const { name_db } = c.req.param();
     const body = await c.request.json();
-    const result = await c.env.DB.prepare(`insert into data (name, alt, imag, post_id) values (?, ?, ?, ?)`)
+    const result = await c.env.DB.prepare(`insert into ${name_db} (name, alt, imag, post_id) values (?, ?, ?, ?)`)
         .run(body.name, body.alt, body.imag, body.post_id);
 
     return (await jsonReply(result));
@@ -22,8 +23,8 @@ export const CreateTask = async (c: any) => {
 
 //export app TaskList for use in worker.ts
 export const TaskList = async (c:any)=> {
-    const { name } = c.req.param();
-    const result = await c.env.DB.prepare(`select * from ${name}`)
+    const { name_db } = c.req.param();
+    const result = await c.env.DB.prepare(`select * from ${name_db}`)
         .bind().all();
 
     return (await jsonReply(result.results));
@@ -31,35 +32,35 @@ export const TaskList = async (c:any)=> {
 
 //export app TaskOne by post_id for use in worker.ts
 export const TaskOne = async (c:any, )=> {
-    const {name, post_id } = c.req.param();
-
-    const result = await c.env.DB.prepare(`select * from ${name} where post_id = ? ;`)
+    const {name_db, post_id } = c.req.param();
+    const result = await c.env.DB.prepare(`select * from ${name_db} where post_id = ? ;`)
         .bind(post_id).all();
     return (await jsonReply(result.results));
 };
 
 //export app UpdateTake by post_id for use in worker.ts
 export const updateTask = async (c:any)=> {
-    const { post_id } = c.req.param();
+    const { post_id, name_db } = c.req.param();
     const body = await c.request.json();
-    const result = await c.env.DB.prepare(`update data set name = ?, alt = ?, imag = ?, post_id = ? where post_id = ?`)
+    const result = await c.env.DB.prepare(`update ${name_db} set name = ?, alt = ?, imag = ?, post_id = ? where post_id = ?`)
         .run(body.name, body.alt, body.imag, body.post_id, post_id);
 
-    return (await jsonReply(result));
+    return (await jsonReply(result.results));
 };
 
 //export app DeleteTask by post_id for use in worker.ts
 export const deleteTask = async (c:any)=> {
-    const { post_id } = c.req.param();
-    const result = await c.env.DB.prepare(`delete from data where post_id = ?`)
+    const { post_id, name_db } = c.req.param();
+    const result = await c.env.DB.prepare(`delete from ${name_db} where post_id = ?`)
         .run(post_id);
 
-    return (await jsonReply(result));
+    return (await jsonReply(result.results));
 };
 
 //export app DeleteAllTask for use in worker.ts
 export const deleteAllTask = async (c:any)=> {
-    const result = await c.env.DB.prepare(`delete from data`)
+    const { name_db } = c.req.param();
+    const result = await c.env.DB.prepare(`delete from ${name_db}`)
         .run();
 
     return (await jsonReply(result));
@@ -93,22 +94,22 @@ export const DeleteDatabase = async (c:any)=> {
 
 //export app fetch request.cf for use in worker.ts
 export const getStatus = async (c:any)=> {
-    const fetchData = await fetch('https://cloudflare.com/cdn-cgi/trace');
-    const data = await fetchData.text();
+    const fetchData = new Request('https://cloudflare.com/cdn-cgi/trace');
+    const data = await fetch(fetchData).then((res) => res.text());
     const result = data.split('\n').reduce((acc, curr) => {
         const [key, value] = curr.split('=');
         return { ...acc, [key]: value };
     }
     , {});
-    const fetchData2 = await fetch('https://request.cf');
-    const data2 = await fetchData2.text();
+    const fetchData2 = new Request('https://request.cf');
+    const data2 = await fetch(fetchData2).then((res) => res.text());
     const result2 = data2.split('\r\n').reduce((acc, curr) => {
         const [key, value] = curr.split('=');
         return { ...acc, [key]: value };
     }, {});
+    
     return await jsonReply({
         trace: result,
         request: result2
     });
-
 };

@@ -33,12 +33,12 @@ app.use(cors({
 //appp route for worker.ts
 app.get('/api', (c: any) => ListDatabase(c));
 app.get('/api/', (c: any) => ListDatabase(c));
-app.get('/api/:name', async (c: any) => TaskList(c));
-app.get('/api/:name/:post_id', async (c: any) => TaskOne(c));
-app.post('/api/data/', async (c: any) => CreateTask(c));
-app.put('/api/data/:post_id', async (c: any) => updateTask(c));
-app.delete('/api/data/:post_id', async (c: any) => deleteTask(c));
-app.delete('/api/data/', async (c: any) => deleteAllTask(c));
+app.get('/api/:name_db', async (c: any) => TaskList(c));
+app.get('/api/:name_db/:post_id', async (c: any) => TaskOne(c));
+app.post('/api/:name_db', async (c: any) => CreateTask(c));
+app.put('/api/:name_db/:post_id', async (c: any) => updateTask(c));
+app.delete('/api/:name_db/:post_id', async (c: any) => deleteTask(c));
+app.delete('/api/:name_db', async (c: any) => deleteAllTask(c));
 app.get('/api/:name', (c: any) => CreateNewDatabase(c));
 app.get('/api/:name', (c: any) => DeleteDatabase(c));
 app.get('/status', (c: any) => getStatus(c));
