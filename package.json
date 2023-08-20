@@ -7,7 +7,6 @@
     "dev": "export NO_D1_WARNING=true && wrangler dev"
   },
   "devDependencies": {
-    "@cloudflare/d1": "^1.4.1",
     "@cloudflare/workers-types": "^4.20230814.0",
     "hono": "^3.4.3",
     "typescript": "^5.1.6",

@@ -3,7 +3,7 @@ main = "src/worker.ts"
 compatibility_date = "2023-08-14"
 
 [[ d1_databases ]]
-binding = "DB" # i.e. available in your Worker on env.DB
+binding = "DB"
 database_name = "northwind-demo"
 database_id = "8a095b42-3932-417d-8995-1ee11b4d6082"
 
@@ -41,7 +41,9 @@ database_id = "8a095b42-3932-417d-8995-1ee11b4d6082"
 # [[services]]
 # binding = "MY_SERVICE"
 # service = "/api/*"
-
+services = [
+  { binding = "TEST_BINDING", service = "TEST_WORKER" }
+]
 # Bind a Durable Object. Durable objects are a scale-to-zero compute primitive based on the actor model.
 # Durable Objects can live for as long as needed. Use these when you need a long-running "server", such as in realtime apps.
 # Docs: https://developers.cloudflare.com/workers/runtime-apis/durable-objects
@@ -54,3 +56,7 @@ database_id = "8a095b42-3932-417d-8995-1ee11b4d6082"
 # [[migrations]]
 # tag = "v1"
 # new_classes = ["MyDurableObject"]
+
+#&[[analytics_engine_datasets]]
+#binding = "BINDING_NAME"
+#dataset = "DATASET_NAME"

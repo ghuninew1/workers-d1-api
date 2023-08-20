@@ -5,9 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 devDependencies:
-  '@cloudflare/d1':
-    specifier: ^1.4.1
-    version: 1.4.1
   '@cloudflare/workers-types':
     specifier: ^4.20230814.0
     version: 4.20230814.0
@@ -22,11 +19,6 @@ devDependencies:
     version: 3.5.1
 
 packages:
-
-  /@cloudflare/d1@1.4.1:
-    resolution: {integrity: sha512-czIBkVoZG7csWK0GVpWXqvnfM2Uv91AqdhwXeTPd1zpdQ+x/or492tD1ybVe679868bGMsHRqtHxp+5rwHXRaA==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
-    dev: true
 
   /@cloudflare/kv-asset-handler@0.2.0:
     resolution: {integrity: sha512-MVbXLbTcAotOPUj0pAMhVtJ+3/kFkwJqc5qNOleOZTv6QkZZABDMS21dSrSlVswEHwrpWC03e4fWytjqKvuE2A==}
