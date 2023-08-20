@@ -8,3 +8,4 @@
     <img src="https://img.shields.io/github/directory-file-count/ghuninew1/workers-d1-api" />
     <img src="https://img.shields.io/github/release-date/ghuninew1/workers-d1-api" />
 </p>
+wrangler d1 execute northwind-demo --command "SELECT name FROM sqlite_schema WHERE type ='table'"

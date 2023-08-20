@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev"
+    "deploy": "export NO_D1_WARNING=true && wrangler deploy",
+    "dev": "export NO_D1_WARNING=true && wrangler dev"
   },
   "devDependencies": {
-    "itty-router": "^4.0.17",
+    "@cloudflare/d1": "^1.4.1",
+    "@cloudflare/workers-types": "^4.20230814.0",
+    "hono": "^3.4.3",
+    "typescript": "^5.1.6",
     "wrangler": "^3.5.1"
   }
 }

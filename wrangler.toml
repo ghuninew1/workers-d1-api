@@ -1,5 +1,5 @@
 name = "test"
-main = "src/worker.js"
+main = "src/worker.ts"
 compatibility_date = "2023-08-14"
 
 [[ d1_databases ]]
