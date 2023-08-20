@@ -92,7 +92,7 @@ export const DeleteDatabase = async (c:any)=> {
 };
 
 //export app fetch request.cf for use in worker.ts
-export const getStatus = async (c:Request)=> {
+export const getStatus = async (c:any)=> {
     const fetchData = await fetch('https://cloudflare.com/cdn-cgi/trace');
     const data = await fetchData.text();
     const result = data.split('\n').reduce((acc, curr) => {
@@ -106,9 +106,9 @@ export const getStatus = async (c:Request)=> {
         const [key, value] = curr.split('=');
         return { ...acc, [key]: value };
     }, {});
-    return (await jsonReply({ 
+    return await jsonReply({
         trace: result,
         request: result2
-    }));
+    });
 
 };
