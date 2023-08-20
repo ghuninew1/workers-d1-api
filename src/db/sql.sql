@@ -1,10 +1,9 @@
-drop table if exists data;
-create table data (
+drop table if exists data2;
+create table data2 (
   id integer primary key autoincrement,
   name text not null,
   alt text not null,
   imag text not null,
-  post_id integer not null autoincrement,
-  timestamp integer not null default (strftime('%s', 'now'))
+  date timestamp default current_timestamp
 );
-create index idx_data_post_id on data (post_id);
+create index idx_data2_post_id on data (id);
