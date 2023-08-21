@@ -1,12 +1,11 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { 
-	jsonReply, 
-	TaskList, 
-	CreateTask, 
-	TaskOne, 
-	updateTask, 
-	deleteTask, 
+import {
+	TaskList,
+	CreateTask,
+	TaskOne,
+	updateTask,
+	deleteTask,
 	ListDatabase,
 	DeleteDatabase,
 	getStatus,
@@ -36,10 +35,17 @@ app.delete('/api/:name', async c => DeleteDatabase(c));
 app.get('/status',async () => getStatus());
 app.get('/', async () => getStatus());
 
-app.notFound((c:any) => jsonReply(c, 404));
-app.onError((err: Error, c: any) => {
-	console.error(`${err}`);
-	return jsonReply(err.toString());
+app.notFound((error: any) => {
+		return new Response(JSON.stringify({
+			error: error,
+			message: 'Not Found 404',
+		 }), { status: 404 });
+});
+app.onError((error: Error) => {
+		return new Response(JSON.stringify({
+			 error: error.message,
+			 message: 'Something went wrong code 500',
+			}), { status: 500 });
 });
 
 export default app;
