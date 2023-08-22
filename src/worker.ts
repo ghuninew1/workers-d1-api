@@ -1,32 +1,43 @@
-import { ErrorHandler, Hono } from 'hono';
+import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { TaskList, CreateTask, TaskOne, updateTask, deleteTask, ListDatabase, DeleteDatabase, getStatus, init } from './api/data';
-import template from './template';
+import { etag } from 'hono/etag'
+import { logger } from 'hono/logger';
+import { TaskList, CreateTask, TaskOne, updateTask, deleteTask, ListDatabase, DeleteDatabase, init } from './api/data';
 
-interface Env {
+export interface Env {
 	DB: any;
 }
-interface WebSocket {
-	accept(): void;
-	send(data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView): void;
-	addEventListener(type: 'message', listener: (event: { data: string }) => void): void;
-	addEventListener(type: 'close', listener: (event: { code: number; reason: string }) => void): void;
-}
-interface WebSocketPair {
-	(): [WebSocket, WebSocket];
-	new (): [WebSocket, WebSocket];
-	prototype: [WebSocket, WebSocket];
-}
+
 
 const app = new Hono();
-app.use(
-	cors({
-		origin: '*', // CORS
-	})
-);
 
-let count = 0;
-/** @param {WebSocket} websocket */
+// Add X-Response-Time header
+app.use('*', async (c, next) => {
+  const start = Date.now()
+  await next()
+  const ms = Date.now() - start
+  c.header('X-Response-Time', `${ms}ms`)
+  c.header('X-powered-By', `GhuniNew`)
+	c.header('Accept-Encoding', 'gzip, deflate, br')
+})
+
+// Mount Builtin Middleware
+app.use(logger(), cors({origin: '*'}), etag());
+
+// Custom Not Found Message
+app.notFound((c) => c.json({
+	message: 'Not Found By GhuniNew',
+	stats: c.req,
+}, 404))
+
+
+// Error handling
+app.onError((err, c) => c.json({
+	name: err.name,
+	message: err.message,
+	stack: err.stack,
+	console: c.req,
+}, 500))
 
 //appp route for worker.ts
 app.get('/api', async (c) => ListDatabase(c));
@@ -38,62 +49,12 @@ app.put('/api/:name_db/:id', async (c) => updateTask(c));
 app.delete('/api/:name_db/:post_id', async (c) => deleteTask(c));
 app.post('/api/:name_db', async (c) => init(c));
 app.delete('/api/:name', async (c) => DeleteDatabase(c));
-app.get('/status', async () => getStatus());
 
+//cloudflare request cf status
+app.get('/', (c) => {
+	const cf = c.req.raw.cf;
+	return c.jsonT(cf);
+})
 
-
-const handleSession = async (websocket: WebSocket) => {
-	websocket.accept();
-	websocket.addEventListener('message', async ({ data }) => {
-		if (data === 'CLICK') {
-			websocket.send(JSON.stringify({ count: 1, tz: new Date() }));
-		} else {
-			// An unknown message came into the server. Send back an error message
-			websocket.send(JSON.stringify({ error: 'Unknown message received', tz: new Date() }));
-		}
-	});
-	websocket.addEventListener('close', async evt => {
-		// Handle when a client closes the WebSocket connection
-		console.log(evt);
-	});
-};
-
-const websocketHandler = async (req: Request) => {
-	const upgradeHeader = req.headers.get('Upgrade');
-	if (upgradeHeader !== 'websocket') {
-		return new Response('Expected websocket', { status: 400 });
-	}
-
-	const [client, server] = Object.values(new WebSocketPair());
-	await handleSession(server);
-	return new Response(null, {
-		status: 101,
-		webSocket: client,
-	});
-};
-//socket route for worker.ts
-app.get('/ws', async (res: any) =>{
-	try {
-		return await websocketHandler(res);
-	} catch (err: any) {
-		/** @type {Error} */
-		let e = err;
-		return new Response(e.toString());
-	}
-});
-
-app.get('/', async (c) => template(c));
-
-app.notFound(err => {
-	return new Response(JSON.stringify({
-		status: err.runtime,
-		error: err.req,
-		massage: err
-	}), { status: 404 });
-});
-
-app.onError((error: Error) => {
-	return new Response(( `error ${error.message}` ), { status: 500 });
-});
 
 export default app;

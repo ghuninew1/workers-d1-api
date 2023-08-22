@@ -1,0 +1,19 @@
+{
+  "name": "basic",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "export NO_D1_WARNING=true && wrangler deploy --minify",
+    "dev": "export NO_D1_WARNING=true && wrangler dev --remote ",
+    "build": "export NO_D1_WARNING=true && wrangler build --release",
+    "kv": "export NO_D1_WARNING=true && wrangler kv:key put --binding=basic --key=foo --value=bar",
+    "dbcre": "export NO_D1_WARNING=true && wrangler d1 execute basic --file='./db.sql'",
+    "viewdb": "export NO_D1_WARNING=true && wrangler d1 execute basic --command='SELECT * FROM data'"
+  },
+  "devDependencies": {
+    "wrangler": "^3.5.1"
+  },
+  "dependencies": {
+    "hono": "^3.5.0"
+  }
+}

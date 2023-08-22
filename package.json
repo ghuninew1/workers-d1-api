@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "deploy": "export NO_D1_WARNING=true && wrangler deploy",
-    "dev": "export NO_D1_WARNING=true && wrangler dev",
-		"db": "export NO_D1_WARNING=true && wrangler d1 execute blog --file ./blog.sql"
+    "deploy": "export NO_D1_WARNING=true && wrangler deploy --minify",
+    "dev": "export NO_D1_WARNING=true && wrangler dev --remote ",
+    "db": "export NO_D1_WARNING=true && wrangler d1 execute blog --file ./blog.sql"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20230814.0",
-    "hono": "^3.4.3",
+    "@cloudflare/workers-types": "^4.20230821.0",
+    "hono": "^3.5.0",
     "typescript": "^5.1.6",
     "wrangler": "^3.5.1"
   }
