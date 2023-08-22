@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "deploy": "export NO_D1_WARNING=true && wrangler deploy",
-    "dev": "export NO_D1_WARNING=true && wrangler dev"
+    "dev": "export NO_D1_WARNING=true && wrangler dev",
+		"db": "export NO_D1_WARNING=true && wrangler d1 execute blog --file ./blog.sql"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230814.0",
