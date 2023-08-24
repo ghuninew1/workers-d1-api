@@ -4,12 +4,15 @@
   "private": true,
   "scripts": {
     "deploy": "export NO_D1_WARNING=true && wrangler deploy --minify",
-    "dev": "export NO_D1_WARNING=true && wrangler dev --remote ",
-    "db": "export NO_D1_WARNING=true && wrangler d1 execute blog --file ./blog.sql"
+    "dev": "export NO_D1_WARNING=true && wrangler dev --port 3000 -r ",
+    "build": "export NO_D1_WARNING=true && wrangler build --release",
+    "kv": "export NO_D1_WARNING=true && wrangler kv:key put --binding=basic --key=foo --value=bar",
+    "dbcre": "export NO_D1_WARNING=true && wrangler d1 execute basic --file='./db.sql'",
+    "viewdb": "export NO_D1_WARNING=true && wrangler d1 execute basic --command='SELECT * FROM data'"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230821.0",
-    "hono": "^3.5.0",
+    "hono": "^3.5.4",
     "typescript": "^5.1.6",
     "wrangler": "^3.5.1"
   }

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#000">
+	<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.png"/>
+	<link rel="apple-touch-icon" type="image/x-icon" href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.ico"/>
+	<link rel="manifest" href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/manifest.json" />
+	<title>GhuniNew</title>
+	<style>
+		html,
+		body {
+			display: grid;
+			place-items: center center;
+			min-height: 100vh;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		h1 {
+			text-align: center;
+		}
+
+		.info {
+			text-align: center;
+			padding: 1rem;
+			color: gray;
+		}
+
+		.info #dolocation {
+			display: block;
+		}
+
+		.info #status {
+			height: 10px;
+			width: 10px;
+			background-color: #bbb;
+			border-radius: 50%;
+			display: inline-block;
+		}
+
+		.info #status.online {
+			background-color: green;
+		}
+
+		.info #status.offline {
+			background-color: red;
+		}
+
+		section {
+			margin: 1rem 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+	</style>
+</head>
+
+<body>
+	<main >
+		<h1>WebSockets</h1>
+
+		<div class="info">
+			<span id="ping">... connecting</span>
+			<span id="status"></span>
+		</div>
+		<div class="info">
+			<button id="click">Click me</button>
+		</div>
+		<div id="coutstatus"></div>
+
+		<section>
+			<span id="cout"></span>
+		</section>
+
+		<section>
+			<span id="req"></span>
+			<span id="info"></span>
+			<span id="location"></span>
+		</section>
+
+	</main>
+
+	<script>
+		// const socket = new WebSocket("ws://localhost:8080");
+		const url = new URL(window.location)
+		url.protocol = location.protocol.replace("http", "ws")
+		url.pathname = "/ws"
+		const socket = new WebSocket(url)
+
+		// add event listener to socket on open
+		socket.addEventListener("open", function (event) {
+			console.log("Connected to server");
+			document.getElementById("status").classList.add("online");
+			document.getElementById("ping").innerText = "Connected";
+		});
+
+		// add event listener to socket on close
+		socket.addEventListener("close", function (event) {
+			console.log("Disconnected from server");
+			document.getElementById("status").classList.remove("online");
+			document.getElementById("status").classList.add("offline");
+			document.getElementById("ping").innerText = "Disconnected";
+		});
+
+		// show message request worker cf status to server innerText to id cout
+		socket.addEventListener("message", function (event) {
+			const data = JSON.parse(event.data);
+			if (data.type === "request") {
+				document.getElementById("cout").innerText = `Request: ${data.value}ms`;
+			}
+		});
+
+		// send message to server on button click send date and time now tolocaltime innerText to id coutstatus
+		document.getElementById("click").addEventListener("click", () => {
+			const date = new Date();
+			socket.send(date.toLocaleTimeString());
+			document.getElementById("coutstatus").innerText = `Date: ${date.toLocaleDateString('th')}, Time: ${date.toLocaleTimeString('th')}`;
+		});
+
+		//show response time from server client connection innerText to id info
+		document.getElementById("click").addEventListener("click", () => {
+			const start = Date.now();
+			socket.send("ping");
+			socket.addEventListener("message", function (event) {
+				const end = Date.now();
+				const time = end - start;
+				document.getElementById("info").innerText = `Ping: ${time}ms`;
+			});
+		});
+
+		// send location to server message  if geolocation is available start on click innerText to id location
+		document.getElementById("click").addEventListener("click", () => {
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition((position) => {
+					const { latitude, longitude } = position.coords;
+					const location = { latitude, longitude };
+					socket.send(JSON.stringify(location));
+					document.getElementById("location").innerText = `Location: ${latitude}, ${longitude}`;
+				});
+			}
+		});
+
+		// send request time from web local to cloudflare worker innerText to id req
+		document.getElementById("click").addEventListener("click", () => {
+			const start = Date.now();
+			fetch("/api")
+				.then((res) => res.json())
+				.then((data) => {
+					const end = Date.now();
+					const time = end - start;
+					document.getElementById("req").innerText = `Request: ${time}ms`;
+				});
+		});
+
+	</script>
+</body>
+
+</html>

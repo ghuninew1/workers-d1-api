@@ -22,3 +22,8 @@ create table if not exists data (
 );
 
 CREATE INDEX IF NOT EXISTS idx_$data_post_id ON data(post_id);
+
+wrangler d1 create your-database --experimental-backend
+
+SELECT total_changes() AS totalChanges, changes() AS changes, last_insert_rowid() AS lastRowId;
+SELECT total_changes() AS totalChanges

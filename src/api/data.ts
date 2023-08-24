@@ -1,130 +1,132 @@
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { etag } from 'hono/etag';
+import corsOptions from '../utils/cors';
+import data from '../api/data';
+import cache from '../utils/cache';
+import { toHtml } from '../utils/toHtml';
 
+export interface Env {
+	DB: D1Database;
+}
 export interface Data {
-    id: number;
-    name: string;
-    alt: string;
-    imag: string;
-    post_id: number;
-    update_at: string;
+	id: number;
+	name: string;
+	alt: string;
+	imag: string;
+	post_id: number;
+	update_at: string;
 }
 
-//export app init for use in worker.ts
-export const init = async (c:any) => {
-		interface Name_db {
-			id: number;
-			name: string;
-			alt: string;
-			imag: string;
-			post_id: number;
-			update_at: string;
-		}
-		const { name_db } = c.req.param();
-    const { success } = await c.env.DB.prepare(
-        `create table if not exists ${name_db} (id integer primary key autoincrement, name text not null, alt text not null, imag text not null,post_id text not null,update_at text not null default (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')));
-				CREATE INDEX IF NOT EXISTS idx_${name_db}_post_id ON ${name_db}(post_id);`)
-				.bind().run();
+const app = new Hono();
 
-    if (success) {
-        return c.text(`Table ${name_db} created successfully`);
-    } else {
-        return c.text(`Table ${name_db} already exists`);
-    }
-};
+// Mount Builtin Middleware
+app.use(cors(corsOptions), etag());
 
-//export app CreateTask for use in worker.ts
-export const CreateTask = async (c:any) => {
-    const { name_db } = c.req.param();
-    const { name, alt, imag, post_id }  = await c.req.json();
+// Add X-Response-Time header
+app.use('*', async (c, next) => {
+	cache(c, false);
+	const start = Date.now();
+	await next();
+	const ms = Date.now() - start;
+	c.header('X-Response-Time', `${ms}ms`);
+	c.header('X-powered-By', `GhuniNew`);
+});
 
-    if(!name) return c.text("Missing Name value")
-    if(!alt) return c.text("Missing alt value")
-    if(!imag) return c.text("Missing imag value")
+// Custom Not Found Message
+app.notFound((error) =>	error.json({ error: error.event}, 404));
 
-    const {success} = await c.env.DB.prepare(
-        `insert into ${name_db} (name, alt, imag, post_id) values (?, ?, ?, ?);`
-        )
-        .bind(name, alt, imag, post_id).run();
+// Error handling
+app.onError((err, c) =>
+	c.json({message: err.message, stack: err.stack}, 500),
+);
 
-    if (success) {
-            c.status(201)
-            return c.text(`insert Cpomplete ${name_db} successfully ${name}, ${alt}, ${imag}, ${post_id}`)
-    } else {
-            c.status(500)
-            return c.text(`Something went wrong${c.req}`)
-    }
-};
+//cloudflare request cf status
+app.get('/cf', async (c) => await c.json(c.req.raw.cf));
+app.get('/cf/', async (c) => await c.html(toHtml(c.req)));
 
-//export app TaskList for use in worker.ts
-export const TaskList = async (c:any) => {
-    const { name_db } = c.req.param();
-    const {results} = await c.env.DB.prepare(`select * from ${name_db};`)
-        .bind().run();
+//
+const api = new Hono();
 
-    return await c.jsonT(results);
-};
+api.get('/', async (c:any) => {
+	const { results } = await c.env.DB.prepare(`select * from sqlite_master where type = 'table';`).all();
+	const tasks = results || [];
+	return c.jsonT(tasks);
+});
 
-//export app TaskOne by post_id for use in worker.ts
-export const TaskOne = async (c:any) => {
-    const {name_db, post_id } = c.req.param();
-    const {results} = await c.env.DB.prepare(
-        `select * from ${name_db} where id = ?;`
-        )
-        .bind(post_id).run();
-    return await c.jsonT(results);
-};
+// insert table by name_db/p
+api.post('/:db_name/p', async (c:any) => {
+	const { db_name } = c.req.param();
+	const { name, alt, imag, post_id } = await c.req.json();
+	const { results } = await c.env.DB.prepare(`INSERT INTO ${db_name} (name, alt, imag, post_id) VALUES (?, ?, ?, ?);`)
+		.bind(name, alt, imag, post_id)
+		.run();
+	const tasks = results || [];
+	if (tasks) {
+		return c.jsonT({
+			message: `${db_name} is added`,
+		});
+	} else {
+		return c.jsonT({
+			message: `${db_name} is not added`,
+		});
+	}
+});
 
-//export app UpdateTake by post_id for use in worker.ts
-export const updateTask = async (c:any )=> {
-    const { id, name_db } = c.req.param();
-    const { name, alt, imag, post_id } = await c.req.json();
+//get database list
+api.get('/:db_name', async (c:any) => {
+	const { db_name } = c.req.param();
+	const { results } = await c.env.DB.prepare(`SELECT * FROM ${db_name};`).all();
+	const tasks = results || [];
+	return c.jsonT(tasks);
+});
 
-    if(!name) return c.text("Missing Name value ")
-    if(!alt) return c.text("Missing alt value ")
-    if(!imag) return c.text("Missing imag value ")
+//get table by id from database
+api.get('/:db_name/:id', async (c:any) => {
+	const { db_name } = c.req.param();
+	const taskId = c.req.param('id');
+	const { results } = await c.env.DB.prepare(`SELECT * FROM ${db_name} WHERE id = ?;`).bind(taskId).all();
+	const tasks = results || [];
+	return c.jsonT(tasks);
+});
 
-    const {success} = await c.env.DB.prepare(
-        `update ${name_db} set name = ?, alt = ?, imag = ?, post_id = ? where id = ?;`)
-        .bind(name, alt, imag, post_id, id).run();
+//delete table by id from database
+api.delete('/:db_name/:id', async (c:any) => {
+	const { db_name } = c.req.param();
+	const taskId = c.req.param('id');
+	await c.env.DB.prepare(`DELETE FROM ${db_name} WHERE id = ?;`).bind(taskId).run();
+	return c.jsonT({
+		message: `${taskId} is deleted`,
+	});
+});
 
-    if (success) {
-        c.status(201)
-        return c.text(`Updated ${name_db} successfully`)
-    } else {
-        c.status(500)
-        return c.text(`Something ${name_db} went wrong ${c.req}`)
-    }
-};
+//update table by id from database
+api.put('/:db_name/:id', async (c:any) => {
+	const { db_name } = c.req.param();
+	const taskId = c.req.param('id');
+	await c.env.DB.prepare(`UPDATE ${db_name} SET done = ? WHERE id = ?;`).bind(taskId).run();
+	return c.jsonT({
+		message: `${taskId} is updated`,
+	});
+});
 
-//export app DeleteTask by post_id for use in worker.ts
-export const deleteTask = async (c:any) => {
-    const { post_id, name_db } = c.req.param();
-    const {success} = await c.env.DB.prepare(`delete from ${name_db} where id = ?;`)
-        .bind(post_id).run();
+//delete database
+api.delete('/:db_name/d', async (c:any) => {
+	const { db_name } = c.req.param();
+	const name = c.req.queries('name');
+	if (name === db_name) {
+		await c.env.DB.prepare(`DROP TABLE ${db_name};`).run();
+		return c.jsonT({
+			message: `${db_name} is deleted`,
+		});
+	} else {
+		return c.jsonT({
+			message: `${db_name} is not deleted`,
+		});
+	}
+});
 
-    if (success) {
-        return c.text(`Deleted ${name_db} successfully`)
-    } else {
-        return c.text(`Something ${name_db} went wrong ${c.req}`)
-    }
-};
+app.route('/api', api);
+app.route('/api/', api);
 
-//export app ListDatabase for use in worker.ts
-export const ListDatabase = async (c:any) => {
-    const {results} = await c.env.DB.prepare(`select * from sqlite_master where type = 'table';`)
-        .all();
-
-    return await c.jsonT(results);
-}
-
-//export app DeleteDatabase for use in worker.ts
-export const DeleteDatabase = async (c:any) => {
-    const { name } = c.req.param();
-    const {success} = await c.env.DB.prepare(`drop table if exists ${name};`)
-        .bind().run();
-
-    if (success) {
-        return c.text(`Deleted ${name} successfully`)
-    } else {
-        return c.text(`Something ${name} went wrong ${c.req}`)
-    }
-};
+export default app;
