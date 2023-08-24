@@ -30,12 +30,12 @@ app.onError((err, c) =>
 );
 
 // Simple route
-app.get('/', async (c) => await c.html(toHtml(c.req.raw)));
-// app.get('/', (c) => c.html(toHtml(c.req)));
+app.get('/', async (c: any) => await c.html(toHtml(c.req.raw)));
+// app.get('/', (c: any) => c.html(toHtml(c.req)));
 
 //cloudflare request cf status
-app.get('/cf', async (c) => await c.json(c.req.raw.cf));
-app.get('/cf/', async (c) => await c.html(toHtml(c.req)));
+app.get('/cf', async (c: any) => await c.json(c.req.raw.cf));
+app.get('/cf/', async (c: any) => await c.html(toHtml(c.req)));
 
 //api route
 app.route('/api', data);

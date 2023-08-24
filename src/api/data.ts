@@ -1,10 +1,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { etag } from 'hono/etag';
-import corsOptions from '../utils/cors';
-import data from '../api/data';
-import cache from '../utils/cache';
+// import cache from '../utils/cache';
 import { toHtml } from '../utils/toHtml';
+import { cache } from 'hono/cache'
 
 export interface Env {
 	DB: D1Database;
@@ -17,15 +16,14 @@ export interface Data {
 	post_id: number;
 	update_at: string;
 }
-
 const app = new Hono();
 
 // Mount Builtin Middleware
-app.use(cors(corsOptions), etag());
+app.use(cors(), etag());
 
 // Add X-Response-Time header
-app.use('*', async (c, next) => {
-	cache(c, false);
+app.use('*', async (c: any, next) => {
+	// cache(c, false);
 	const start = Date.now();
 	await next();
 	const ms = Date.now() - start;
@@ -33,17 +31,20 @@ app.use('*', async (c, next) => {
 	c.header('X-powered-By', `GhuniNew`);
 });
 
-// Custom Not Found Message
-app.notFound((error) =>	error.json({ error: error.event}, 404));
+app.get('*',cache({
+	  cacheName: 'GNEW',
+	  cacheControl: 'max-age=3600',
+	})
+  )
 
-// Error handling
-app.onError((err, c) =>
-	c.json({message: err.message, stack: err.stack}, 500),
-);
+app.notFound(async (c: any) => c.json(`Not Found ${c.res.status}`  , 404));
+app.onError(async (err: any,c) => c.text(`Internal Server Error 500 ${err}`, 500));
+
+app.get('/', async (c: any) => await c.html(toHtml(c.req)));
 
 //cloudflare request cf status
-app.get('/cf', async (c) => await c.json(c.req.raw.cf));
-app.get('/cf/', async (c) => await c.html(toHtml(c.req)));
+app.get('/cf', async (c: any) => await c.json(c.req.raw.cf));
+app.get('/cf/', async (c: any) => await c.html(toHtml(c.req)));
 
 //
 const api = new Hono();
@@ -51,7 +52,7 @@ const api = new Hono();
 api.get('/', async (c:any) => {
 	const { results } = await c.env.DB.prepare(`select * from sqlite_master where type = 'table';`).all();
 	const tasks = results || [];
-	return c.jsonT(tasks);
+	return c.json(tasks);
 });
 
 // insert table by name_db/p
@@ -63,11 +64,11 @@ api.post('/:db_name/p', async (c:any) => {
 		.run();
 	const tasks = results || [];
 	if (tasks) {
-		return c.jsonT({
+		return c.json({
 			message: `${db_name} is added`,
 		});
 	} else {
-		return c.jsonT({
+		return c.json({
 			message: `${db_name} is not added`,
 		});
 	}
@@ -78,7 +79,7 @@ api.get('/:db_name', async (c:any) => {
 	const { db_name } = c.req.param();
 	const { results } = await c.env.DB.prepare(`SELECT * FROM ${db_name};`).all();
 	const tasks = results || [];
-	return c.jsonT(tasks);
+	return c.json(tasks);
 });
 
 //get table by id from database
@@ -95,7 +96,7 @@ api.delete('/:db_name/:id', async (c:any) => {
 	const { db_name } = c.req.param();
 	const taskId = c.req.param('id');
 	await c.env.DB.prepare(`DELETE FROM ${db_name} WHERE id = ?;`).bind(taskId).run();
-	return c.jsonT({
+	return c.json({
 		message: `${taskId} is deleted`,
 	});
 });
@@ -105,7 +106,7 @@ api.put('/:db_name/:id', async (c:any) => {
 	const { db_name } = c.req.param();
 	const taskId = c.req.param('id');
 	await c.env.DB.prepare(`UPDATE ${db_name} SET done = ? WHERE id = ?;`).bind(taskId).run();
-	return c.jsonT({
+	return c.json({
 		message: `${taskId} is updated`,
 	});
 });
@@ -116,11 +117,11 @@ api.delete('/:db_name/d', async (c:any) => {
 	const name = c.req.queries('name');
 	if (name === db_name) {
 		await c.env.DB.prepare(`DROP TABLE ${db_name};`).run();
-		return c.jsonT({
+		return c.json({
 			message: `${db_name} is deleted`,
 		});
 	} else {
-		return c.jsonT({
+		return c.json({
 			message: `${db_name} is not deleted`,
 		});
 	}

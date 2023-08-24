@@ -12,19 +12,16 @@ export default {
 			const url = new URL(request.url);
 			switch (url.pathname) {
 				case "/":
-					return template();
+					return await api.fetch(request, env, ctx);
+				case "/ws/":
+					return await template();
 				case "/ws":
 					return await websocketHandler(request);
-				case "/api":
-					return api.fetch(request, env, ctx);
 				default:
-					return api.fetch(request, env, ctx);
+					return await api.fetch(request, env, ctx);
 			}
-		} catch (err: unknown) {
-			const e = err as Error;
-			return new Response(e.toString());
+		} catch (err: any) {
+			return new Response(err.stack || err);
 		}
 	},
-}
-
-
+};
