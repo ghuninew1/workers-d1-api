@@ -1,11 +1,11 @@
-
+// import template from "./template"
 let count = 0
 
 // addEventListener('fetch', event => {
-//   event.respondWith(handleRequest(event.request))
+//   event.respondWith(websocketHandler(event.request))
 // })
 
-async function handleSession(websocket: WebSocket) {
+async function handleSession(websocket) {
   websocket.accept()
   websocket.addEventListener("message", async ({ data }) => {
     if (data === "CLICK") {
@@ -23,7 +23,7 @@ async function handleSession(websocket: WebSocket) {
   })
 }
 
-const websocketHandler = async (request: Request) => {
+const websocketHandler = async (request) => {
   const upgradeHeader = request.headers.get("Upgrade")
   if (upgradeHeader !== "websocket") {
     return new Response("Expected websocket", { status: 400 })
@@ -38,4 +38,26 @@ const websocketHandler = async (request: Request) => {
   })
 }
 
-export default websocketHandler
+export { websocketHandler}
+// export default {
+// 	/**
+// 	 * @param {Request} req
+// 	 */
+// 	async fetch(req) {
+// 		try {
+// 			const url = new URL(req.url);
+// 			switch (url.pathname) {
+// 				case '/ws':
+// 					return template();
+// 				case '/ws/':
+// 					return await websocketHandler(req);
+// 				default:
+// 					return new Response('Not found', { status: 404 });
+// 			}
+// 		} catch (err) {
+// 			/** @type {Error} */ let e = err;
+// 			return new Response(e.toString());
+// 		}
+// 	},
+// };
+

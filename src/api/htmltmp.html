@@ -90,7 +90,7 @@
 		// const socket = new WebSocket("ws://localhost:8080");
 		const url = new URL(window.location)
 		url.protocol = location.protocol.replace("http", "ws")
-		url.pathname = "/ws"
+		url.pathname = "/ws/"
 		const socket = new WebSocket(url)
 
 		// add event listener to socket on open

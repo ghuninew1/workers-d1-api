@@ -2,18 +2,16 @@
   "name": "@ghuninew1/workers-d1-api",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "deploy": "export NO_D1_WARNING=true && wrangler deploy --minify",
-    "dev": "export NO_D1_WARNING=true && wrangler dev --port 3001 ",
-    "build": "export NO_D1_WARNING=true && wrangler build --release",
+    "dev": "export NO_D1_WARNING=true && wrangler dev --port 3001 --minify -r ",
     "kv": "export NO_D1_WARNING=true && wrangler kv:key put --binding=basic --key=foo --value=bar",
     "dbcre": "export NO_D1_WARNING=true && wrangler d1 execute basic --file='./db.sql'",
     "viewdb": "export NO_D1_WARNING=true && wrangler d1 execute basic --command='SELECT * FROM data'"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20230821.0",
     "hono": "^3.5.4",
-    "typescript": "^5.2.2",
     "wrangler": "^3.6.0"
   }
 }

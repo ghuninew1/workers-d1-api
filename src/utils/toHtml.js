@@ -1,9 +1,5 @@
-interface obj {
-	[key: string]: any;
-}
-
 // convert obj to html
-export const convertTohtml = (obj: { [x: string]: any; }) => {
+export const convertTohtml = (obj) => {
 	//convert obj to ul
 	let tr = '';
 	for (let key in obj) {
@@ -19,7 +15,7 @@ export const convertTohtml = (obj: { [x: string]: any; }) => {
 };
 
 // html template
-export const htmlTemp = (obj: string) => {
+export const htmlTemp = (obj) => {
 	let html = `<!DOCTYPE html>
 	<html lang="en">
 	<head>
@@ -85,6 +81,6 @@ export const htmlTemp = (obj: string) => {
 }
 
 // insert convertTohtml to htmlTemp
-export const toHtml = (obj: { [x: string]: any; }) => {
+export const toHtml = (obj) => {
 	return htmlTemp(convertTohtml(obj));
 }
