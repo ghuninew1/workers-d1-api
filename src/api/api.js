@@ -1,52 +1,64 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { etag } from 'hono/etag';
-import { toHtml } from '../utils/toHtml';
-import { cache } from 'hono/cache'
-import { listDataBase, insertInto, getTable,getIdTable, updateTable,delTable,dropDatabase } from './data';
+// import { cors } from 'hono/cors';
+// import { etag } from 'hono/etag';
 
 const api = new Hono();
 
-// Mount Builtin Middleware
-api.use(cors(), etag());
-
-// Add X-Response-Time header
-api.use('*', async (c , next) => {
-  // cache(c, false);
-  const start = Date.now();
-  await next();
-  const ms = Date.now() - start;
-  c.header('X-Response-Time', `${ms}ms`);
-  c.header('X-powered-By', `GhuniNew`);
+api.get('/api', async (request,env) => {
+  const { results } = await env.DB.prepare(`select * from sqlite_master where type = 'table';`).all();
+  const tasks = results || [];
+  return Response.json(tasks);
 });
 
-api.use('*',cache({
-    cacheName: 'GNEW',
-    cacheControl: 'max-age=3600'
-  })
-)
+api.get('/api/:db_name', async (request,env) => {
+  const { db_name } = request.param();
+  const { results } = await env.DB.prepare(`SELECT * FROM ${db_name};`).bind().run();
+  const tasks = results || [];
+  return Response.json(tasks);
+});
 
-// api.notFound(async (c) => c.json(`Not Found ${c.res.status}`  , 404));
-// api.onError(async (err,c) => c.text(`Internal Server Error 500 ${err}`, 500));
+api.post('/api/:db_name/p', async (request,env) => {
+  const { db_name } = request.param();
+  const { name, alt, imag, post_id } = await request.json();
+  const { results } = await env.DB.prepare(`INSERT INTO ${db_name} (name, alt, imag, post_id) VALUES (?, ?, ?, ?);`)
+    .bind(name, alt, imag, post_id)
+    .run();
+  const tasks = results || [];
+  if (tasks) {
+    return Response.json({ message: `${db_name} is added` });
+  } else { 
+    return Response.json({ message: `${db_name} is not added` });
+  }
+});
 
-//get database list
-api.get('/', async (c) => listDataBase(c));
+api.get('/api/:db_name/:id', async (request,env) => {
+  const { db_name } = request.param();
+  const taskId = request.param('id');
+  const { results } = await env.DB.prepare(`SELECT * FROM ${db_name} WHERE id = ?;`).bind(taskId).run();
+  const tasks = results || [];
+  return Response.json(tasks);
+});
 
-// insert table by name_db/p
-api.post('/:db_name/p', async (c) => insertInto(c));
-//get database list
-api.get('/:db_name', async (c) => getTable(c));
+api.put('/api/:db_name/:id', async (request,env) => {
+  const { db_name } = request.param();
+  const taskId = request.param('id');
+  if (taskId){
+    await env.DB.prepare(`UPDATE ${db_name} SET done = ? WHERE id = ?;`).bind(taskId).run();
+    return Response.json({ message: `${taskId} is updated` });
+  } else {
+    return Response.json({ message: `id is not updated` });
+  }			
+});
 
-//get table by id from database
-api.get('/:db_name/:id', async (c) => getIdTable(c));
-
-//delete table by id from database
-api.delete('/:db_name/:id', async (c) => delTable(c));
-
-//update table by id from database
-api.put('/:db_name/:id', async (c) => updateTable(c));
-
-//delete database
-api.delete('/:db_name/d', async (c) => dropDatabase(c));
+api.delete('/api/:db_name/:id', async (request,env) => {
+  const { db_name } = request.param();
+  const taskId = request.param('id');
+  if (taskId){
+    await env.DB.prepare(`DELETE FROM ${db_name} WHERE id = ?;`).bind(taskId).run();
+    return Response.json({ message: `${taskId} is deleted` });
+  } else { 
+    return Response.json({ message: `id is not deleted` });
+  }
+});
 
 export default api;

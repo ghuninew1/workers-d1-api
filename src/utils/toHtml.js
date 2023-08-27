@@ -43,7 +43,7 @@ export const htmlTemp = (obj) => {
 		.api{
 			margin: 0 auto;
 			max-width: 1200px;
-			padding: 10px;
+			padding: 5px;
 		}
 		ul {
 			list-style: none;
@@ -58,16 +58,15 @@ export const htmlTemp = (obj) => {
 			padding: 10px;
 			border: 0.1px solid #5b52522a;
 			list-style: none;
-			font-size: 14px;
 		}
 		.key{
 			color: skyblue;
 			font-weight: bold;
-			font-size: 16px;
+			font-size: 14px;
 		}
 		.obj{
 			color: darkorange;
-			font-size: 14px;
+			font-size: 12px;
 		}
 		</style>
 	</head>
