@@ -1,164 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="theme-color" content="#000">
-	<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.png"/>
-	<link rel="apple-touch-icon" type="image/x-icon" href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.ico"/>
-	<link rel="manifest" href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/manifest.json" />
-	<title>GhuniNew</title>
-	<style>
-		html,
-		body {
-			display: grid;
-			place-items: center center;
-			min-height: 100vh;
-		}
 
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-
-		h1 {
-			text-align: center;
-		}
-
-		.info {
-			text-align: center;
-			padding: 1rem;
-			color: gray;
-		}
-
-		.info #dolocation {
-			display: block;
-		}
-
-		.info #status {
-			height: 10px;
-			width: 10px;
-			background-color: #bbb;
-			border-radius: 50%;
-			display: inline-block;
-		}
-
-		.info #status.online {
-			background-color: green;
-		}
-
-		.info #status.offline {
-			background-color: red;
-		}
-
-		section {
-			margin: 1rem 0;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-		}
-	</style>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000">
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.png" />
+  <link rel="apple-touch-icon" type="image/x-icon"
+    href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.ico" />
+  <link rel="manifest" href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/manifest.json" />
+  <script src="htmltmp.js"></script>
+  <title>GhuniNew</title>
+  
+  <!-- <script src="./js/react.production.min.js"></script>
+  <script src="./js/react-dom.production.min.js"></script>
+  <script src="./js/babel.min.js"></script>
+  <script type="text/jsx" src="./js/main.jsx"></script>
+  <link prefetch rel="stylesheet" href="./css/main.css"/> -->
+  
 </head>
 
 <body>
-	<main >
-		<h1>WebSockets</h1>
+  <div id="root"></div>
 
-		<div class="info">
-			<span id="ping">... connecting</span>
-			<span id="status"></span>
-		</div>
-		<div class="info">
-			<button id="click">Click me</button>
-		</div>
-		<div id="coutstatus"></div>
+  
+ 
+  <!-- <script>
+    // const socket = new WebSocket("ws://localhost:8080");
 
-		<section>
-			<span id="cout"></span>
-		</section>
+    var ws;
 
-		<section>
-			<span id="req"></span>
-			<span id="info"></span>
-			<span id="location"></span>
-		</section>
+    async function websocket( url ) {
+      ws = new WebSocket( url )
 
-	</main>
 
-	<script>
-		// const socket = new WebSocket("ws://localhost:8080");
-		const url = new URL(window.location)
-		url.protocol = location.protocol.replace("http", "ws")
-		url.pathname = "/ws/"
-		const socket = new WebSocket(url)
+      if ( !ws ) {
+        return new Error( "server didn't accept ws" )
+      }
 
-		// add event listener to socket on open
-		socket.addEventListener("open", function (event) {
-			console.log("Connected to server");
-			document.getElementById("status").classList.add("online");
-			document.getElementById("ping").innerText = "Connected";
-		});
+      ws.addEventListener( "open", () => onOpen() );
 
-		// add event listener to socket on close
-		socket.addEventListener("close", function (event) {
-			console.log("Disconnected from server");
-			document.getElementById("status").classList.remove("online");
-			document.getElementById("status").classList.add("offline");
-			document.getElementById("ping").innerText = "Disconnected";
-		});
+      ws.addEventListener( "message", ( { data } ) => {
 
-		// show message request worker cf status to server innerText to id cout
-		socket.addEventListener("message", function (event) {
-			const data = JSON.parse(event.data);
-			if (data.type === "request") {
-				document.getElementById("cout").innerText = `Request: ${data.value}ms`;
-			}
-		});
+        const { count, tz, error, res, timeSent } = JSON.parse( data )
+        addNewEvent( data )
+        if ( error ) {
+          setErrorMessage( error )
+        } else {
+          setErrorMessage()
+          updateCount( count )
+          getPing( data );
+        }
 
-		// send message to server on button click send date and time now tolocaltime innerText to id coutstatus
-		document.getElementById("click").addEventListener("click", () => {
-			const date = new Date();
-			socket.send(date.toLocaleTimeString());
-			document.getElementById("coutstatus").innerText = `Date: ${date.toLocaleDateString('th')}, Time: ${date.toLocaleTimeString('th')}`;
-		});
 
-		//show response time from server client connection innerText to id info
-		document.getElementById("click").addEventListener("click", () => {
-			const start = Date.now();
-			socket.send("ping");
-			socket.addEventListener("message", function (event) {
-				const end = Date.now();
-				const time = end - start;
-				document.getElementById("info").innerText = `Ping: ${time}ms`;
-			});
-		});
+      } )
 
-		// send location to server message  if geolocation is available start on click innerText to id location
-		document.getElementById("click").addEventListener("click", () => {
-			if (navigator.geolocation) {
-				navigator.geolocation.getCurrentPosition((position) => {
-					const { latitude, longitude } = position.coords;
-					const location = { latitude, longitude };
-					socket.send(JSON.stringify(location));
-					document.getElementById("location").innerText = `Location: ${latitude}, ${longitude}`;
-				});
-			}
-		});
+      ws.addEventListener( "close", () => {
+        console.log( 'Closed websocket' )
 
-		// send request time from web local to cloudflare worker innerText to id req
-		document.getElementById("click").addEventListener("click", () => {
-			const start = Date.now();
-			fetch("/api")
-				.then((res) => res.json())
-				.then((data) => {
-					const end = Date.now();
-					const time = end - start;
-					document.getElementById("req").innerText = `Request: ${time}ms`;
-				});
-		});
+        const list = document.querySelector( "#events" )
+        list.innerText = ""
+        updateCount( 0 )
+        setErrorMessage()
+      } );
 
-	</script>
+
+      document.querySelector( "#click" ).addEventListener( "click", () => {
+        ws.send( "CLICK" )
+      } );
+
+      const closeConnection = () => {
+        ws.close()
+        onClose()
+      }
+      document.querySelector( "#close" ).addEventListener( "click", closeConnection )
+      document.querySelector( "#unknown" ).addEventListener( "click", () => ws.send( "HUH" ) )
+
+    }
+
+    const url = new URL( window.location )
+    url.protocol = location.protocol.replace( "http", "ws" )
+    url.pathname = "/ws/"
+
+    // const socket = new WebSocket( url )
+    websocket( url )
+
+    const onClose = () => {
+      document.querySelector( "#status" ).classList.add( "offline" );
+      document.querySelector( "#status" ).classList.remove( "online" );
+      document.querySelector( "#ping" ).innerText = "Disconnected";
+      console.log( 'Closed websocket' )
+      const list = document.querySelector( "#events" )
+      list.innerText = ""
+      updateCount( 0 )
+    }
+    const onOpen = () => {
+
+      document.querySelector( "#status" ).classList.add( "online" )
+      document.querySelector( "#status" ).classList.remove( "offline" )
+      document.querySelector( "#ping" ).innerText = "Connected"
+      document.querySelector( "#date" ).innerHTML = new Date().toLocaleString( 'th' )
+      document.querySelector( "#info" ).innerHTML = new Date().getMilliseconds() + " ms"
+      console.log( "Connected to server" )
+      updateCount( 0 )
+      getLocation()
+    }
+
+    const updateCount = ( count ) => document.querySelector( "#num" ).innerText = `Count: ${ count }`;
+
+    const addNewEvent = ( data ) => {
+      const list = document.querySelector( "#events" )
+      const item = document.createElement( "li" )
+      item.innerText = data
+      list.prepend( item )
+    }
+    const setErrorMessage = message => document.querySelector( "#error" ).innerHTML = message ? message : "";
+
+    const getLocation = () => {
+      if ( navigator.geolocation ) {
+        navigator.geolocation.getCurrentPosition( ( position ) => {
+          const { latitude, longitude } = position.coords;
+          const location = { latitude, longitude };
+          document.querySelector( "#location" ).innerText = `Lati: ${ latitude } :: Logi: ${ longitude }\n`;
+        } );
+      } else {
+        document.querySelector( "#location" ).innerText = "Geolocation is not supported by this browser.";
+      }
+    }
+
+    const getPing = ( data ) => {
+      // const timeStart = new Date()
+      const { tz, res } = JSON.parse( data )
+      const end = res
+
+      console.log( JSON.parse( data ) )
+      return document.querySelector( "#info" ).innerText = `Ping: ${ end } ms`;
+    }
+
+  </script> -->
 </body>
 
 </html>

@@ -1,63 +1,53 @@
 // import template from "./template"
-let count = 0
+ 
+  async function handleSession(ws) {
+    ws.accept();
+    let count = 0;
 
-// addEventListener('fetch', event => {
-//   event.respondWith(websocketHandler(event.request))
-// })
+    ws.addEventListener('message', async (event) => {
 
-async function handleSession(websocket) {
-  websocket.accept()
-  websocket.addEventListener("message", async ({ data }) => {
-    if (data === "CLICK") {
-      count += 1
-      websocket.send(JSON.stringify({ count, tz: new Date() }))
-    } else {
-      // An unknown message came into the server. Send back an error message
-      websocket.send(JSON.stringify({ error: "Unknown message received", tz: new Date() }))
-    }
-  })
+      if (ws.event === 'CLICK') {
+        count += 1;
+        ws.send(JSON.stringify({ count, tz: new Date() }));
+      } if(ws.event === 'CLICKUN') {
+        count -= 1;
+        // An unknown message came into the server. Send back an error message
+        ws.send(JSON.stringify({ error: 'Unknown message received', tz: new Date() }));
+      }
+    });
+    ws.addEventListener('open', async (res,req) => {
 
-  websocket.addEventListener("close", async evt => {
-    // Handle when a client closes the WebSocket connection
-    console.log(evt)
-  })
-}
+    });
 
-const websocketHandler = async (request) => {
-  const upgradeHeader = request.headers.get("Upgrade")
-  if (upgradeHeader !== "websocket") {
-    return new Response("Expected websocket", { status: 400 })
+
+  
+    ws.addEventListener('close', async event => {
+      // Handle when a client closes the WebSocket connection
+      console.log(event);
+    });
   }
 
-  const [client, server] = Object.values(new WebSocketPair())
-  await handleSession(server)
 
-  return new Response(null, {
-    status: 101,
-    webSocket: client
-  })
+async function websocketHandler(req) {
+	const upgradeHeader = req.headers.get('Upgrade');
+	if (upgradeHeader !== 'websocket') {
+		return new Response('Expected websocket', { status: 400 });
+	}
+	const [client, server] = Object.values(new WebSocketPair());
+	await handleSession(server);
+
+	return new Response(null, {
+		status: 101,
+		webSocket: client,
+	});
 }
 
-export { websocketHandler}
-// export default {
-// 	/**
-// 	 * @param {Request} req
-// 	 */
-// 	async fetch(req) {
-// 		try {
-// 			const url = new URL(req.url);
-// 			switch (url.pathname) {
-// 				case '/ws':
-// 					return template();
-// 				case '/ws/':
-// 					return await websocketHandler(req);
-// 				default:
-// 					return new Response('Not found', { status: 404 });
-// 			}
-// 		} catch (err) {
-// 			/** @type {Error} */ let e = err;
-// 			return new Response(e.toString());
-// 		}
-// 	},
-// };
-
+export default websocketHandler;
+	// async fetch(req) {
+	// 	try {
+	// 				return await websocketHandler(req);
+	// 		} catch (err) {
+  //       return new Response(err.stack || err);
+  //     }
+  //   },
+  // };

@@ -3,6 +3,7 @@ main = "src/index.js"
 workers_dev = true
 account_id = "1d44b4bc080be3fb025f311344f57888"
 compatibility_date = "2023-08-14"
+node_compat = true
 
 [[ d1_databases ]]
 binding = "DB"
@@ -13,6 +14,12 @@ kv_namespaces = [
      { binding = "basic", id = "52477016461c45c0995fbc012d4b1ff4", preview_id = "a1e8e1bc5cbe4d91b100ef64203e1190" }
 ]
 
+analytics_engine_datasets = [
+    { binding = "ANALYTICS", dataset = "change_me" }
+]
 #[vars]
 #SITEMAP_URL = "https://api.ghuninew.workers.dev"
 #SITEMAP_API = "https://api.ghuninew.workers.dev/api"
+
+[site]
+bucket = "./public"
