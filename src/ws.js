@@ -10,7 +10,13 @@ async function handleSession(websocket) {
     const data = JSON.parse(event.data).data;
     const tz = JSON.parse(event.data).time;
     const getdb = JSON.parse(event.data).getdb;
-
+    if (data === "GETDB") {
+      fetch(`https://api.ghuninew.workers.dev/api/${getdb}`)
+        .then((res) => res.json())
+        .then((res) => {
+          websocket.send(JSON.stringify({ tasks: res }));
+        });
+    }
     if (data === "CLICK") {
       count += 1;
       websocket.send(
@@ -40,15 +46,6 @@ async function handleSession(websocket) {
           time: new Date().getTime() - tz + " ms",
         })
       );
-    }
-    if (data === "GETDB") {
-      fetch(`https://api.ghuninew.workers.dev/api/${getdb}`)
-        .then((res) => res.json())
-        .then((res) => {
-          websocket.send(JSON.stringify({ tasks: res }));
-        });
-
-      console.log(getdb);
     }
   });
 

@@ -33,7 +33,7 @@ export default {
 
     app.get("/ws", async (c) => c.html(template));
 
-    app.get("/ws/", async (c) => websocketHandler(request, c));
+    app.get("/ws/", async (c) => websocketHandler(request));
 
     app.get("/ping", async (c) => await ping.fetch(request, env, ctx));
 
