@@ -93,11 +93,14 @@ button:hover{
   font-weight: 700;
 }
   </style>
+</head>
+<body>
+
 
 <main class="info">
 <span class=status>
-<p >WebSockets</p>&nbsp;
-<span id="data"></span>&nbsp;
+<p>WebSocKets</p>
+<span id="data">...Connecting</span>&nbsp;
 <span id="status"></span>
 </span>
 
@@ -108,8 +111,10 @@ button:hover{
 
     </div>
     <div >
-      <button id="click">Click</button>
+      <button id="click">Click+</button>
+      <button id="clickdown">Click-</button>
       <button id="unknown">unknown</button>
+      <button id="reset">reset</button>
 
       <button id="close">Close</button>
     </div>
@@ -119,10 +124,13 @@ button:hover{
 </main>
 
 <script>
+
   let ws
 
   async function websocket(url) {
     ws = new WebSocket(url)
+
+    const list = document.querySelector("#events")
 
     if (!ws) {
       throw new Error("server didn't accept ws")
@@ -149,7 +157,6 @@ button:hover{
     ws.addEventListener("close", () => {
       console.log('Closed websocket')
 
-      const list = document.querySelector("#events")
       list.innerText = ""
       updateCount(0)
       setErrorMessage()
@@ -164,8 +171,17 @@ button:hover{
   url.pathname = "/ws/"
   websocket(url)
 
-  document.querySelector("#click").addEventListener("click", () => {
-    ws.send("CLICK")
+  const btcClick = document.querySelector("#click");
+  const btcClickdown = document.querySelector("#clickdown");
+  const btcReset = document.querySelector("#reset");
+  const btcUnknown = document.querySelector("#unknown");
+  const btcClose = document.querySelector("#close");
+  
+  btcClick.addEventListener("click", () => {
+    ws.send(JSON.stringify({ data: "CLICK", time: new Date().getTime() }))
+  })
+  btcClickdown.addEventListener("click", () => {
+    ws.send(JSON.stringify({ data: "CLICKDOWN", time: new Date().getTime() }))
   })
 
   const updateCount = (count) => {
@@ -175,19 +191,30 @@ button:hover{
   const addNewEvent = (data) => {
     const list = document.querySelector("#events")
     const item = document.createElement("li")
+    if (list.children.length > 5) {
+      list.children[5].remove()
+    }
     item.innerText = data
     list.prepend(item)
   }
 
   const closeConnection = () => ws.close()
 
-  document.querySelector("#close").addEventListener("click", closeConnection)
-  document.querySelector("#unknown").addEventListener("click", () => ws.send("HUH"))
+  btcReset.addEventListener("click", () => {
+    ws.send("RESET")
+  })
+  
+  btcClose.addEventListener("click", closeConnection)
+  
+  btcUnknown.addEventListener("click", () => {
+    ws.send(JSON.stringify({ data: "UNKNOWN", time: new Date().getTime() }))
+  })
 
   const setErrorMessage = message => {
     document.querySelector("#error").innerHTML = message ? message : ""
   }
 </script>
+</body>
 `;
 
 export default () => {

@@ -4,15 +4,51 @@ let count = 0;
 /** @param {WebSocket} websocket */
 async function handleSession(websocket) {
   websocket.accept();
-  websocket.addEventListener("message", async ({ data }) => {
+  websocket.addEventListener("message", async (event) => {
+    // const { data, tz } = JSON.parse(event);
+
+    const data = JSON.parse(event.data).data;
+    const tz = JSON.parse(event.data).time;
+    const getdb = JSON.parse(event.data).getdb;
+
     if (data === "CLICK") {
       count += 1;
-      websocket.send(JSON.stringify({ count, tz: new Date() }));
-    } else {
-      // An unknown message came into the server. Send back an error message
       websocket.send(
-        JSON.stringify({ error: "Unknown message received", tz: new Date() })
+        JSON.stringify({
+          count,
+          tz: new Date().toLocaleString("th"),
+          time: new Date().getTime() - tz + " ms",
+        })
       );
+    }
+    if (data === "CLICKDOWN") {
+      count -= 1;
+      websocket.send(
+        JSON.stringify({
+          count,
+          tz: new Date().toLocaleString("th"),
+          time: new Date().getTime() - tz + " ms",
+        })
+      );
+    }
+    if (data === "RESET") {
+      count = 0;
+      websocket.send(
+        JSON.stringify({
+          count,
+          tz: new Date().toLocaleString("th"),
+          time: new Date().getTime() - tz + " ms",
+        })
+      );
+    }
+    if (data === "GETDB") {
+      fetch(`https://api.ghuninew.workers.dev/api/${getdb}`)
+        .then((res) => res.json())
+        .then((res) => {
+          websocket.send(JSON.stringify({ tasks: res }));
+        });
+
+      console.log(getdb);
     }
   });
 
@@ -39,23 +75,3 @@ async function websocketHandler(req) {
 }
 
 export default websocketHandler;
-
-// export default {
-//   /**
-//    * @param {Request} req
-//    */
-//   async fetch(req) {
-//     try {
-//       const url = new URL(req.url);
-//       switch (url.pathname) {
-//         case "/ws/":
-//           return await websocketHandler(req);
-//         default:
-//           return new Response("Not found", { status: 404 });
-//       }
-//     } catch (err) {
-//       /** @type {Error} */ let e = err;
-//       return new Response(e.toString());
-//     }
-//   },
-// };

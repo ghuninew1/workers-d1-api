@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "deploy": "export NO_D1_WARNING=true && wrangler deploy --minify",
-    "dev": "export NO_D1_WARNING=true && wrangler dev --port 3001",
-    "devr": "export NO_D1_WARNING=true && wrangler dev --port 3000 -r ",
+    "dev": "export NO_D1_WARNING=true && wrangler dev",
+    "devr": "export NO_D1_WARNING=true && wrangler dev -r ",
     "start-stackblitz": "WRANGLER_SEND_METRICS=false wrangler dev index.js --local"
   },
   "devDependencies": {

@@ -4,8 +4,7 @@ import { cors } from "hono/cors";
 import { etag } from "hono/etag";
 import { htmltmp } from "./htmltmp";
 import ping from "./ping";
-import template from "./template";
-import manifest from "../public/manifest.json";
+import template from "./template.html";
 
 export default {
   async fetch(request, env, ctx) {
@@ -32,10 +31,9 @@ export default {
       return c.html(htmltmp(request, starttime));
     });
 
-    app.get("/ws", async (c) => template(request, starttime));
-    app.get(" ", (c) => c.json({ hello: "world" }));
+    app.get("/ws", async (c) => c.html(template));
 
-    app.get("/ws/", async (c) => websocketHandler(request));
+    app.get("/ws/", async (c) => websocketHandler(request, c));
 
     app.get("/ping", async (c) => await ping.fetch(request, env, ctx));
 
@@ -138,6 +136,7 @@ export default {
     app.notFound((c) => c.json("Not Found", 404));
 
     env.__app = app;
+
     return env.__app.fetch(request);
   },
 };

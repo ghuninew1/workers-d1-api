@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000" />
+
+  <title>GhuniNew</title>
+
+  <style>
+    html,
+    body {
+      place-items: center center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: tahoma, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    li {
+      list-style: none;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .info2 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .info {
+      text-align: center;
+      padding: 10px;
+      color: gray;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .info #dolocation {
+      display: block;
+    }
+
+    .info #status {
+      height: 20px;
+      width: 20px;
+      background-color: #bbb;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .info #status.online {
+      background-color: green;
+    }
+
+    .info #status.offline {
+      background-color: red;
+    }
+
+    section {
+      margin: 0 auto;
+      align-items: center;
+    }
+
+    button {
+      background-color: #015e04;
+      border: none;
+      padding: 10px;
+      margin: 5px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      border-radius: 7px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    button:last-child {
+      background-color: #dd5608;
+      color: #000;
+    }
+
+    button:hover {
+      background-color: transparent;
+      outline: 3px solid #dd5608;
+      color: #000;
+    }
+
+    .status {
+      align-items: center;
+      text-align: center;
+      padding: 0;
+      margin: 5px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .event {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      margin: 5px;
+      padding: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="info2">
+    <div class="info">
+      <h1>WebSocKets</h1>
+      <div>
+        <span id="data">...Connecting</span>&nbsp;
+        <span id="status"></span>
+        <p id="time"></p>
+        <span id="res"></span>
+        <span id="num">num</span>
+      </div>
+
+      <div>
+        <p id="error" style="color: red"></p>
+      </div>
+      <div>
+        <button id="click">Click+</button>
+        <button id="clickdown">Click-</button>
+
+        <button id="reset">reset</button>
+
+        <button id="close">Close</button>
+      </div>
+      <section class="event">
+        <input type="text" id="inputdb" onchange="(e)=>{e.target.value}" />
+        <button id="unknown">get DB</button>
+      </section>
+      <section>
+        <ul id="events"></ul>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    let ws;
+
+    async function websocket(url) {
+      ws = new WebSocket(url);
+
+      const list = document.querySelector("#events");
+
+      if (!ws) {
+        throw new Error("server didn't accept ws");
+      }
+
+      ws.addEventListener("open", () => {
+        console.log("Opened websocket");
+        updateCount(0);
+        document.querySelector("#data").innerText = "online";
+        document.querySelector("#status").classList.add("online");
+      });
+
+      ws.addEventListener("message", ({ data }) => {
+        const { count, tz, time, tasks, error } = JSON.parse(data);
+        if (tasks) {
+          addNewEvent(tasks);
+          setErrorMessage();
+        } else if (time) {
+          setErrorMessage();
+          updateCount(count);
+          document.getElementById("res").innerText = time;
+          document.getElementById("time").innerText = tz;
+        }
+
+        if (error) {
+          setErrorMessage(error);
+        }
+      });
+
+      ws.addEventListener("close", () => {
+        console.log("Closed websocket");
+
+        list.innerText = "";
+        updateCount(0);
+        setErrorMessage();
+        document.querySelector("#data").innerText = "offline";
+        document.querySelector("#status").classList.add("offline");
+        document.querySelector("#status").classList.remove("online");
+      });
+    }
+
+    const url = new URL(window.location);
+    url.protocol = location.protocol.replace("http", "ws");
+    url.pathname = "/ws/";
+    websocket(url);
+
+    const btcClick = document.querySelector("#click");
+    const btcClickdown = document.querySelector("#clickdown");
+    const btcReset = document.querySelector("#reset");
+    const btcUnknown = document.querySelector("#unknown");
+    const btcClose = document.querySelector("#close");
+
+    btcClick.addEventListener("click", () => {
+      ws.send(JSON.stringify({ data: "CLICK", time: new Date().getTime() }));
+    });
+
+    btcClickdown.addEventListener("click", () => {
+      ws.send(
+        JSON.stringify({ data: "CLICKDOWN", time: new Date().getTime() })
+      );
+    });
+
+    const updateCount = (count) => {
+      document.querySelector("#num").innerText = `Count: ${count}`;
+    };
+
+    const addNewEvent = (data) => {
+      //new Response data to json page new
+
+      // if (list.children.length > 5) {
+      //   list.children[5].remove();
+      // }
+
+
+      for (let i = 0; i < data.length; i++) {
+        const list = document.querySelector("#events");
+        const item = document.createElement("li");
+
+        item.innerText = JSON.stringify(data[i]);
+        list.prepend(item);
+      }
+
+
+
+      // const list = document.querySelector("#events");
+      // const item = document.createElement("li");
+
+      // item.innerText = result;
+      // list.prepend(item);
+      // console.log(result);
+    };
+
+    const closeConnection = () => ws.close();
+
+    btcReset.addEventListener("click", () => {
+      ws.send(JSON.stringify({ data: "RESET", time: new Date().getTime() }));
+    });
+
+    btcClose.addEventListener("click", closeConnection);
+
+    btcUnknown.addEventListener("click", () => {
+      const getdb = document.querySelector("#inputdb").value;
+      console.log(getdb);
+      ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
+    });
+
+    const setErrorMessage = (message) => {
+      document.querySelector("#error").innerHTML = message ? message : "";
+    };
+  </script>
+</body>
+
+</html>
