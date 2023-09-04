@@ -91,11 +91,11 @@
         cursor: pointer;
         color: #fff;
         font-weight: 600;
-        
+        transition: 0.3s;
       }
 
       button:last-child {
-        background-color: #d6a02d;
+        background-color: #eb3820;
         color: #000;
       }
 
@@ -128,7 +128,8 @@
         margin: 0 auto;
         padding: 0;
         margin-top: 10px;
-        transition: 0.5s;
+        transition: 0.3s;
+        visibility: hidden;
       }
       table {
         border-collapse: collapse;
@@ -141,8 +142,8 @@
         transition: 0.5s;
       }
       table thead {
-        background-color: #c2ae9d2f;
-        color: #060606;
+        background-color: #544b41;
+        color: #847e7e;
       }
       table thead th {
         padding: 0;
@@ -184,6 +185,18 @@
         width: 100px;
         transition: 0.5s;
       }
+      #btconnect{
+        transition: 0.5s;
+      }
+      #tabledb{
+        transition: 0.5s;
+      }
+      #tabledb span {
+        padding: 5px;
+        margin: 5px;
+        border: 1px solid #ddd;
+        transition: 0.5s;
+      }
 
     </style>
   </head>
@@ -206,20 +219,20 @@
         <section class="event">
           
           <input type="text" id="inputdb" onchange="(e)=>{e.target.value}" />
-          <button id="unknown">Get</button>          
-          <button id="click">Get DB</button>
+          <button id="get">Get</button>          
+          <button id="getdb">Get DB</button>
           <button id="create">Add DB</button>
         </section>
-        <div class="bbtn">
-          <button id="open">Open</button>
+        <div id="btconnect">
+          <button id="open">Connect</button>
           <button id="close">Close</button>
         </div>
-        <hr />
         <section id="tabledb">
         </section>
         <hr />
           <table >
             <thead id="from">
+              <tbody id="fromtbody"></tbody>
             </thead>
             <tbody id="events"></tbody>
           </table>
@@ -232,6 +245,27 @@
     <script>
       let ws;
 
+      const openId = document.querySelector("#open");
+      const closeId = document.querySelector("#close");
+      const getId = document.querySelector("#get");
+      const getdbId = document.querySelector("#getdb");
+      const createId = document.querySelector("#create");
+      const updateId = document.querySelector("#update");
+      const deleteId = document.querySelector("#delete");
+      const cancelId = document.querySelector("#cancel");
+      const addId = document.querySelector("#add");
+      const inputdbId = document.querySelector("#inputdb");
+      const tabledbId = document.querySelector("#tabledb");
+      const fromId = document.querySelector("#from");
+      const fromtbodyId = document.querySelector("#fromtbody");
+      const eventsId = document.querySelector("#events");
+      const dataId = document.querySelector("#data");
+      const statusId = document.querySelector("#status");
+      const resId = document.querySelector("#res");
+      const dateId = document.querySelector("#date");
+      const errorId = document.querySelector("#error");
+      const btconnectId = document.querySelector("#btconnect");
+
       async function websocket(url) {
         ws = new WebSocket(url);
 
@@ -241,22 +275,19 @@
 
         await ws.addEventListener("open", () => {
           console.log("Opened websocket");
-          document.querySelector("#data").innerText = "Online";
-          document.querySelector("#status").classList.add("online");
-          document.getElementById("date").innerText = new Date().toLocaleString('th-TH');
+          isConnect();
         });
 
         await ws.addEventListener("message", ({ data }) => {
           const { time, tasks, table, error } = JSON.parse(data);
-          document.getElementById("res").innerText = Number(time).toFixed(2) + " ms";
-          const list = document.getElementById("events");
-          const table1 = document.getElementById("tabledb");
-          const froms = document.getElementById("from");
+          resId.innerText = Number(time).toFixed(2) + " ms";
 
           if (table) {
-            const item = document.createElement("span");
-            item.innerText = JSON.stringify(table.name && table.name);
-            table1.prepend(item);
+            table.forEach((tb) => {
+              const item = document.createElement("span");
+              item.innerText = JSON.stringify(tb.name ? tb.rootpage + ": " + tb.name  : table);
+              eventsId.prepend(item);
+            });
           }
           if (tasks) {
             const itemth = document.createElement("tr");
@@ -278,7 +309,7 @@
             itemth.appendChild(th3);
             itemth.appendChild(th4);
             itemth.appendChild(th5);
-            froms.appendChild(itemth);
+            fromId.appendChild(itemth);
 
             tasks.forEach((task) => {
             const item = document.createElement("tr");
@@ -303,7 +334,7 @@
             item.appendChild(td4);
             item.appendChild(td5);
 
-            list.appendChild(item);
+            eventsId.appendChild(item);
           });
           }
 
@@ -313,45 +344,36 @@
         });
 
         await ws.addEventListener("close", () => {
-          document.querySelector("#events").innerText = "";
-          document.querySelector("#tabledb").innerText = "";
-          setErrorMessage("Closed websocket");
-          document.querySelector("#data").innerText = "Offline";
-          document.querySelector("#status").classList.add("offline");
-          document.querySelector("#status").classList.remove("online");
+          console.log("Closed websocket");
+          disConnect();
         });
       }
 
       const url = new URL(window.location);
       url.protocol = location.protocol.replace("http", "ws");
       url.pathname = "/ws/";
-      websocket(url);
+      // websocket(url);
 
-      const closeConnection = () => ws.close();
-
-      document.querySelector("#close").addEventListener("click", closeConnection);
-
-      document.querySelector("#click").addEventListener("click", () => {
+      
+      getId.onclick = () => {
         const getdb = document.querySelector("#inputdb").value;
-        ws.send(JSON.stringify({ data: "CLICK", getdb: getdb }));
-      });
+        ws.send(JSON.stringify({ data: "GET", getdb: getdb }));
+      };
 
-      document.querySelector("#unknown").addEventListener("click", () => {
+      getdbId.onclick = () => {
         const getdb = document.querySelector("#inputdb").value;
         ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
-      });
+      };
 
-      document.querySelector("#create").addEventListener("click", () => {
-        const table1 = document.getElementById("tabledb");
+      createId.onclick = () => {
         const getdb = document.querySelector("#inputdb").value;
-        const froms = document.getElementById("from");
         const itemth = document.createElement("tr");
         const input = document.createElement("input");
         const input1 = document.createElement("input");
         const input2 = document.createElement("input");
         const input3 = document.createElement("input");
         const input4 = document.createElement("input");
-        const input5 = document.createElement("input");
+        const input5 = document.createElement("span");
 
         const th = document.createElement("th");
         const th1 = document.createElement("th");
@@ -360,13 +382,6 @@
         const th4 = document.createElement("th");
         const th5 = document.createElement("th");
 
-        th.innerText = "id";
-        th1.innerText = "name";
-        th2.innerText = "alt";
-        th3.innerText = "imag";
-        th4.innerText = "post_id";
-        th5.innerText = "update_at";  
-
         const td = document.createElement("td");
         const td1 = document.createElement("td");
         const td2 = document.createElement("td");
@@ -374,24 +389,31 @@
         const td4 = document.createElement("td");
         const td5 = document.createElement("td");
 
+        itemth.setAttribute("id", "itemth");
+
         input.setAttribute("type", "number");
         input.setAttribute("id", "id");
         input.setAttribute("placeholder", "id");
+        input.setAttribute("onchange", "(e)=>{e.target.value}");
         input1.setAttribute("type", "text");
         input1.setAttribute("id", "name");
         input1.setAttribute("placeholder", "name");
+        input1.setAttribute("onchange", "(e)=>{e.target.value}");
         input2.setAttribute("type", "text");
         input2.setAttribute("id", "alt");
         input2.setAttribute("placeholder", "alt");
+        input2.setAttribute("onchange", "(e)=>{e.target.value}");
         input3.setAttribute("type", "text");
         input3.setAttribute("id", "imag");
         input3.setAttribute("placeholder", "imag");
+        input3.setAttribute("onchange", "(e)=>{e.target.value}");
         input4.setAttribute("type", "text");
         input4.setAttribute("id", "post_id");
         input4.setAttribute("placeholder", "post_id");
-        input5.setAttribute("type", "text");
+        input4.setAttribute("onchange", "(e)=>{e.target.value}");
+        // input5.setAttribute("type", "text");
         input5.setAttribute("id", "update_at");
-        input5.setAttribute("placeholder", "update_at");
+        // input5.setAttribute("placeholder", "update_at");
 
         td.appendChild(input);
         td1.appendChild(input1);
@@ -416,17 +438,17 @@
         tr2.appendChild(td4);
         tr2.appendChild(td5);
 
-        froms.appendChild(itemth);
-        froms.appendChild(tr2);
+        fromId.appendChild(itemth);
+        fromId.appendChild(tr2);
 
         const button = document.createElement("button");
         button.setAttribute("id", "add");
         button.innerText = "Add";
-        table1.appendChild(button);
+        tabledbId.appendChild(button);
 
-        document.getElementById("update_at").value = new Date().toLocaleString('th-TH');
+        document.getElementById("update_at").innerText = new Date().toLocaleString('th-TH');
 
-        document.querySelector("#add").addEventListener("click", () => {
+        button.onclick = () => {
           const getid = document.querySelector("#id").value;
           const getname = document.querySelector("#name").value;
           const getalt = document.querySelector("#alt").value;
@@ -443,15 +465,14 @@
               getpost_id: getpost_id,
             })
           );
-        });
+        };
 
         const button1 = document.createElement("button");
         button1.setAttribute("id", "update");
         button1.innerText = "Update";
-        table1.appendChild(button1);
-                
+        tabledbId.appendChild(button1);
 
-        document.querySelector("#update").addEventListener("click", () => {
+        button1.onclick = () => {
           const getid = document.querySelector("#id").value;
           const getname = document.querySelector("#name").value;
           const getalt = document.querySelector("#alt").value;
@@ -468,14 +489,14 @@
               getpost_id: getpost_id,
             })
           );
-        });
+        };
 
         const button2 = document.createElement("button");
         button2.setAttribute("id", "delete");
         button2.innerText = "Delete";
-        table1.appendChild(button2);
+        tabledbId.appendChild(button2);
 
-        document.querySelector("#delete").addEventListener("click", () => {
+        button2.onclick = () => {
           const getid = document.querySelector("#id").value;
           ws.send(
             JSON.stringify({
@@ -484,26 +505,72 @@
               getid: getid,
             })
           );
-        });
+        };
 
         const cancel = document.createElement("button");
         cancel.setAttribute("id", "cancel");
         cancel.innerText = "Cancel";
-        table1.appendChild(cancel);
+        tabledbId.appendChild(cancel);
 
-        document.querySelector("#cancel").addEventListener("click", () => {
-          //remove element from dom
-          document.getElementById("from").remove();
-          document.getElementById("add").remove();
-          document.getElementById("update").remove();
-          document.getElementById("delete").remove();
-          document.getElementById("cancel").remove();
-        });
-        
-      });
+        cancel.onclick = () => {
+          if (fromId.childNodes.length > 0) {
+            while (fromId.firstChild) {
+              fromId.removeChild(fromId.firstChild);
+            }
+          }
+          if (fromtbodyId.childNodes.length > 0) {
+            while (fromtbodyId.firstChild) {
+              fromtbodyId.removeChild(fromtbodyId.firstChild);
+            }
+          }
+          if (eventsId.childNodes.length > 0) {
+            while (eventsId.firstChild) {
+              eventsId.removeChild(eventsId.firstChild);
+            }
+          }
+          if (tabledbId.childNodes.length > 0) {
+            while (tabledbId.firstChild) {
+              tabledbId.removeChild(tabledbId.firstChild);
+            }
+          } 
+        };
+      };
+    
+      //websocket reconnect
+      openId.onclick = () => {
+        websocket(url);
+        isConnect();
+      };
+
+      closeId.onclick = () => {
+        ws.close();
+        ws = null;
+        disConnect();
+      };
+
+      const isConnect = () =>{
+        dataId.innerText = "Online";
+        statusId.classList.add("online");
+        statusId.classList.remove("offline");
+        document.querySelector(".event").setAttribute("style", "visibility: visible;");
+        dateId.innerText = new Date().toLocaleString('th-TH');
+        btconnectId.classList.add("bbtn");
+      }
+      const disConnect =() => {
+        dataId.innerText = "Offline";
+        statusId.classList.add("offline");
+        statusId.classList.remove("online");
+        document.querySelector(".event").setAttribute("style", "visibility: hidden;");
+        btconnectId.classList.remove("bbtn");
+        errorId.innerText = "";
+        dateId.innerText = "";
+        eventsId.innerText = "";
+        tabledbId.innerText = "";
+
+      }
 
       const setErrorMessage = (message) => {
-        document.querySelector("#error").innerHTML = message ? message : "";
+        errorId.innerHTML = message ? message : "";
       };
     </script>
   </body>

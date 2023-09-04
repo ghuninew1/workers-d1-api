@@ -4,74 +4,29 @@ import { cors } from "hono/cors";
 import { etag } from "hono/etag";
 import ping from "./ping";
 import template from "./template.html";
-import { html } from "hono/html";
+import {htmltmp} from "./htmltmp";
 
 export default {
   async fetch(request, env, ctx) {
     const app = new Hono();
 
-    const timeStart = process.hrtime();
+    const timeStart = Date.now();
     
     // Mount Builtin Middlewar
     app.use(etag()), cors({ origin: "*" });
 
-
     app.use("*", async (c, next) => {
       
-      const end_time = process.hrtime(timeStart);
+      const end_time = Date.now();
       await next();
-      const totalTimeInMs = end_time[0] * 1000 + end_time[1] / 1000000;
+      const totalTimeInMs = end_time - timeStart;
       c.res.headers.set("X-Response-Time", `${totalTimeInMs} ms`);
       c.res.headers.set("Access-Allow-Origin", "*");
       c.res.headers.set("X-powered-By", `GhuniNew`);
     });
 
-    const Layout = ({ children, title }) => html` <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>${title}</title>
-          <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            body {
-              place-items: center;
-              font-family: Tahoma, Geneva, Verdana, sans-serif;
-              font-size: 14px;
-            }
-          </style>
-        </head>
-        <body>
-          ${children}
-        </body>
-      </html>`;
+    app.get("/", async (c) => c.html(htmltmp(request, timeStart)));
 
-    app.get("/", async (c) => {
-      const end_time = process.hrtime(timeStart);
-      const totalTimeInMs = end_time[0] * 1000 + end_time[1] / 1000000;
-      const Contents = () => (
-        <Layout title={"test"}>
-        <span>time Res: {totalTimeInMs} ms</span>
-          <table style="width:50%" border="0">
-            <tbody>
-              {Object.entries(request.cf).map(([key, value]) => (
-                <tr>
-                  <td>{key}</td>
-                  <td>{value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Layout>
-      );
-      return c.html(<Contents />);
-    });
-
-    // app.get("/ws", () => template());
     app.get("/ws", async (c) => c.html(template));
 
     app.get("/ws/", async (c) => websocketHandler(request, env));
@@ -150,9 +105,10 @@ export default {
     app.put("/api/:db_name/:id", async (c) => {
       const { db_name } = c.req.param();
       const taskId = c.req.param("id");
+      const { name, alt, imag, post_id } = await c.req.json();
       if (taskId) {
-        await env.DB.prepare(`UPDATE ${db_name} SET done = ? WHERE id = ?;`)
-          .bind(taskId)
+        await env.DB.prepare(`UPDATE ${db_name} SET name = ?, alt = ?, imag = ?, post_id = ? WHERE id = ?;`)
+          .bind(name, alt, imag, post_id, taskId)
           .run();
         return c.json({ message: `${taskId} is updated` });
       } else {
