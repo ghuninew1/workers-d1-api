@@ -2,38 +2,79 @@ import websocketHandler from "./ws";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { etag } from "hono/etag";
-import { htmltmp } from "./htmltmp";
 import ping from "./ping";
 import template from "./template.html";
+import { html } from "hono/html";
 
 export default {
   async fetch(request, env, ctx) {
     const app = new Hono();
-    const starttime = Date.now();
 
+    const timeStart = process.hrtime();
+    
     // Mount Builtin Middlewar
     app.use(etag()), cors({ origin: "*" });
 
-    app.use("/*", async (c, next) => {
-      const start = Date.now();
+
+    app.use("*", async (c, next) => {
+      
+      const end_time = process.hrtime(timeStart);
       await next();
-      c.header("Access-Allow-Origin", "*");
-      c.header("X-Request-Start", `${Date.now() - starttime} ms`);
-      c.header("X-Response-Time", `${Date.now() - start} ms`);
-      c.header("X-powered-By", `GhuniNew`);
-      // c.header('Cache-Control', 'max-age=3600, immutable');
-      // c.header('Cache-Control', 'max-age=14400, s-maxage=84000, immutable');
-      // c.header('Cloudflare-CDN-Cache-Control', 'max-age=24400, s-maxage=84000, immutable');
-      // c.header('CDN-Cache-Control', 'max-age=18000');
+      const totalTimeInMs = end_time[0] * 1000 + end_time[1] / 1000000;
+      c.res.headers.set("X-Response-Time", `${totalTimeInMs} ms`);
+      c.res.headers.set("Access-Allow-Origin", "*");
+      c.res.headers.set("X-powered-By", `GhuniNew`);
     });
+
+    const Layout = ({ children, title }) => html` <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>${title}</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body {
+              place-items: center;
+              font-family: Tahoma, Geneva, Verdana, sans-serif;
+              font-size: 14px;
+            }
+          </style>
+        </head>
+        <body>
+          ${children}
+        </body>
+      </html>`;
 
     app.get("/", async (c) => {
-      return c.html(htmltmp(request, starttime));
+      const end_time = process.hrtime(timeStart);
+      const totalTimeInMs = end_time[0] * 1000 + end_time[1] / 1000000;
+      const Contents = () => (
+        <Layout title={"test"}>
+        <span>time Res: {totalTimeInMs} ms</span>
+          <table style="width:50%" border="0">
+            <tbody>
+              {Object.entries(request.cf).map(([key, value]) => (
+                <tr>
+                  <td>{key}</td>
+                  <td>{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Layout>
+      );
+      return c.html(<Contents />);
     });
 
+    // app.get("/ws", () => template());
     app.get("/ws", async (c) => c.html(template));
 
-    app.get("/ws/", async (c) => websocketHandler(request));
+    app.get("/ws/", async (c) => websocketHandler(request, env));
 
     app.get("/ping", async (c) => await ping.fetch(request, env, ctx));
 

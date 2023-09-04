@@ -4,12 +4,14 @@
   "version": "1.0.0",
   "scripts": {
     "deploy": "export NO_D1_WARNING=true && wrangler deploy --minify",
-    "dev": "export NO_D1_WARNING=true && wrangler dev",
+    "dev": "export NO_D1_WARNING=true && wrangler dev ",
     "devr": "export NO_D1_WARNING=true && wrangler dev -r ",
+    "publish": "export NO_D1_WARNING=true && wrangler publish --minify",
     "start-stackblitz": "WRANGLER_SEND_METRICS=false wrangler dev index.js --local"
   },
   "devDependencies": {
     "hono": "^3.5.6",
-    "wrangler": "3.6.0"
+    "node": "^20.5.1",
+    "wrangler": "^3.6.0"
   }
 }

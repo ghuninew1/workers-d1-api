@@ -1,272 +1,510 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      type="image/x-icon"
+      href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.ico"
+    />
+    <link
+      rel="manifest"
+      href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/manifest.json"
+    />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#000" />
+    <title>GhuniNew</title>
 
-  <title>GhuniNew</title>
-
-  <style>
-    html,
-    body {
-      place-items: center center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
-      font-family: tahoma, sans-serif;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    li {
-      list-style: none;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    .info2 {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-
-    .info {
-      text-align: center;
-      padding: 10px;
-      color: gray;
-      position: relative;
-      margin: 0 auto;
-    }
-
-    .info #dolocation {
-      display: block;
-    }
-
-    .info #status {
-      height: 20px;
-      width: 20px;
-      background-color: #bbb;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .info #status.online {
-      background-color: green;
-    }
-
-    .info #status.offline {
-      background-color: red;
-    }
-
-    section {
-      margin: 0 auto;
-      align-items: center;
-    }
-
-    button {
-      background-color: #015e04;
-      border: none;
-      padding: 10px;
-      margin: 5px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      border-radius: 7px;
-      cursor: pointer;
-      color: #fff;
-    }
-
-    button:last-child {
-      background-color: #dd5608;
-      color: #000;
-    }
-
-    button:hover {
-      background-color: transparent;
-      outline: 3px solid #dd5608;
-      color: #000;
-    }
-
-    .status {
-      align-items: center;
-      text-align: center;
-      padding: 0;
-      margin: 5px;
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .event {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      margin: 5px;
-      padding: 10px;
-    }
-  </style>
-</head>
-
-<body>
-  <main class="info2">
-    <div class="info">
-      <h1>WebSocKets</h1>
-      <div>
-        <span id="data">...Connecting</span>&nbsp;
-        <span id="status"></span>
-        <p id="time"></p>
-        <span id="res"></span>
-        <span id="num">num</span>
-      </div>
-
-      <div>
-        <p id="error" style="color: red"></p>
-      </div>
-      <div>
-        <button id="click">Click+</button>
-        <button id="clickdown">Click-</button>
-
-        <button id="reset">reset</button>
-
-        <button id="close">Close</button>
-      </div>
-      <section class="event">
-        <input type="text" id="inputdb" onchange="(e)=>{e.target.value}" />
-        <button id="unknown">get DB</button>
-      </section>
-      <section>
-        <ul id="events"></ul>
-      </section>
-    </div>
-  </main>
-
-  <script>
-    let ws;
-
-    async function websocket(url) {
-      ws = new WebSocket(url);
-
-      const list = document.querySelector("#events");
-
-      if (!ws) {
-        throw new Error("server didn't accept ws");
+    <style>
+      body {
+        place-items: center;
+        margin: 0;
+        padding: 0;
+        font-family: tahoma, sans-serif;
+        font-size: 14px;
       }
 
-      ws.addEventListener("open", () => {
-        console.log("Opened websocket");
-        updateCount(0);
-        document.querySelector("#data").innerText = "online";
-        document.querySelector("#status").classList.add("online");
-      });
-
-      ws.addEventListener("message", ({ data }) => {
-        const { count, tz, time, tasks, error } = JSON.parse(data);
-        if (tasks) {
-          addNewEvent(tasks);
-          setErrorMessage();
-        } else if (time) {
-          setErrorMessage();
-          updateCount(count);
-          document.getElementById("res").innerText = time;
-          document.getElementById("time").innerText = tz;
-        }
-
-        if (error) {
-          setErrorMessage(error);
-        }
-      });
-
-      ws.addEventListener("close", () => {
-        console.log("Closed websocket");
-
-        list.innerText = "";
-        updateCount(0);
-        setErrorMessage();
-        document.querySelector("#data").innerText = "offline";
-        document.querySelector("#status").classList.add("offline");
-        document.querySelector("#status").classList.remove("online");
-      });
-    }
-
-    const url = new URL(window.location);
-    url.protocol = location.protocol.replace("http", "ws");
-    url.pathname = "/ws/";
-    websocket(url);
-
-    const btcClick = document.querySelector("#click");
-    const btcClickdown = document.querySelector("#clickdown");
-    const btcReset = document.querySelector("#reset");
-    const btcUnknown = document.querySelector("#unknown");
-    const btcClose = document.querySelector("#close");
-
-    btcClick.addEventListener("click", () => {
-      ws.send(JSON.stringify({ data: "CLICK", time: new Date().getTime() }));
-    });
-
-    btcClickdown.addEventListener("click", () => {
-      ws.send(
-        JSON.stringify({ data: "CLICKDOWN", time: new Date().getTime() })
-      );
-    });
-
-    const updateCount = (count) => {
-      document.querySelector("#num").innerText = `Count: ${count}`;
-    };
-
-    const addNewEvent = (data) => {
-      //new Response data to json page new
-
-      // if (list.children.length > 5) {
-      //   list.children[5].remove();
-      // }
-
-
-      for (let i = 0; i < data.length; i++) {
-        const list = document.querySelector("#events");
-        const item = document.createElement("li");
-
-        item.innerText = JSON.stringify(data[i]);
-        list.prepend(item);
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
 
+      li {
+        list-style: none;
+      }
 
+      .info {
+        text-align: center;
+        padding: 10px;
+        margin: 0 auto;
+        align-items: center;
+        width: 100%;
+        max-width: 900px;
+        transition: 0.5s;
+      }
 
-      // const list = document.querySelector("#events");
-      // const item = document.createElement("li");
+      .info #status {
+        height: 15px;
+        width: 15px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+      }
 
-      // item.innerText = result;
-      // list.prepend(item);
-      // console.log(result);
-    };
+      .info #status.online {
+        background-color: green;
+      }
 
-    const closeConnection = () => ws.close();
+      .info #status.offline {
+        background-color: red;
+      }
 
-    btcReset.addEventListener("click", () => {
-      ws.send(JSON.stringify({ data: "RESET", time: new Date().getTime() }));
-    });
+      .info .online {
+        color: green;
+      }
 
-    btcClose.addEventListener("click", closeConnection);
+      .info .offline {
+        color: red;
+      }
 
-    btcUnknown.addEventListener("click", () => {
-      const getdb = document.querySelector("#inputdb").value;
-      console.log(getdb);
-      ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
-    });
+      section {
+        margin: 0 auto;
+        align-items: center;
+        transition: 0.5s;
+      }
 
-    const setErrorMessage = (message) => {
-      document.querySelector("#error").innerHTML = message ? message : "";
-    };
-  </script>
-</body>
+      button {
+        background-color: #00532f;
+        border: none;
+        padding: 8px;
+        margin: 5px;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: #fff;
+        font-weight: 600;
+        
+      }
 
+      button:last-child {
+        background-color: #d6a02d;
+        color: #000;
+      }
+
+      button:hover {
+        background-color: #00885d20;
+        outline: 3px solid #dd5608;
+        color: #000;
+      }
+
+      .data {
+        font-size: 18px;
+        color: #00885d;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+      .status {
+        align-items: center;
+        text-align: center;
+        padding: 10px;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .event {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        padding: 0;
+        margin-top: 10px;
+        transition: 0.5s;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 5px;
+        border: 1px solid #ddd;
+        max-width: 900px;
+        align-items: center;
+        justify-content: center;
+        transition: 0.5s;
+      }
+      table thead {
+        background-color: #c2ae9d2f;
+        color: #060606;
+      }
+      table thead th {
+        padding: 0;
+        text-align: center;
+      }
+      table tbody tr:nth-child(odd) {
+        background-color: #eee;
+      }
+      table tbody tr:nth-child(even) {
+        background-color: #fff;
+      }
+      table tbody td {
+        padding: 0;
+        text-align: center;
+      }
+      table tbody td:nth-child(1) {
+        text-align: left;
+      }
+      .bbtn {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 auto;
+        padding: 0;
+        margin-top: 10px;
+        transition: 0.5s;
+      }
+      input{
+        padding: 5px;
+        margin: 5px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        width: 80px;
+        transition: 0.5s;
+      }
+      input:focus{
+        outline: 3px solid #dd5608;
+        width: 100px;
+        transition: 0.5s;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <main class="info2">
+      <div class="info">
+        <h1 >API GNEW</h1>
+        <br />
+        <div class="data" >
+          <span id="data">...Connecting</span>&nbsp;
+          <span id="status"></span>
+          <span id="res"></span>
+        </div>
+        <div>
+          <p id="date"></p>
+          <p id="error" style="color: red"></p>
+        </div>
+
+        <section class="event">
+          
+          <input type="text" id="inputdb" onchange="(e)=>{e.target.value}" />
+          <button id="unknown">Get</button>          
+          <button id="click">Get DB</button>
+          <button id="create">Add DB</button>
+        </section>
+        <div class="bbtn">
+          <button id="open">Open</button>
+          <button id="close">Close</button>
+        </div>
+        <hr />
+        <section id="tabledb">
+        </section>
+        <hr />
+          <table >
+            <thead id="from">
+            </thead>
+            <tbody id="events"></tbody>
+          </table>
+      </div>
+    </main>
+    <footer style="text-align: center;">
+      <span style="font-size: small;">© 2023 GhuniNew</span>
+    </footer>
+    
+    <script>
+      let ws;
+
+      async function websocket(url) {
+        ws = new WebSocket(url);
+
+        if (!ws) {
+          throw new Error("server didn't accept ws");
+        }
+
+        await ws.addEventListener("open", () => {
+          console.log("Opened websocket");
+          document.querySelector("#data").innerText = "Online";
+          document.querySelector("#status").classList.add("online");
+          document.getElementById("date").innerText = new Date().toLocaleString('th-TH');
+        });
+
+        await ws.addEventListener("message", ({ data }) => {
+          const { time, tasks, table, error } = JSON.parse(data);
+          document.getElementById("res").innerText = Number(time).toFixed(2) + " ms";
+          const list = document.getElementById("events");
+          const table1 = document.getElementById("tabledb");
+          const froms = document.getElementById("from");
+
+          if (table) {
+            const item = document.createElement("span");
+            item.innerText = JSON.stringify(table.name && table.name);
+            table1.prepend(item);
+          }
+          if (tasks) {
+            const itemth = document.createElement("tr");
+            const th = document.createElement("th");
+            const th1 = document.createElement("th");
+            const th2 = document.createElement("th");
+            const th3 = document.createElement("th");
+            const th4 = document.createElement("th");
+            const th5 = document.createElement("th");
+            th.innerText = "id";
+            th1.innerText = "name";
+            th2.innerText = "alt";
+            th3.innerText = "imag";
+            th4.innerText = "post_id";
+            th5.innerText = "update_at";
+            itemth.appendChild(th);
+            itemth.appendChild(th1);
+            itemth.appendChild(th2);
+            itemth.appendChild(th3);
+            itemth.appendChild(th4);
+            itemth.appendChild(th5);
+            froms.appendChild(itemth);
+
+            tasks.forEach((task) => {
+            const item = document.createElement("tr");
+            const td = document.createElement("td");
+            const td1 = document.createElement("td");
+            const td2 = document.createElement("td");
+            const td3 = document.createElement("td");
+            const td4 = document.createElement("td");
+            const td5 = document.createElement("td");
+
+            td.innerText = JSON.stringify(task.id && task.id);
+            td1.innerText = JSON.stringify(task.name && task.name);
+            td2.innerText = JSON.stringify(task.alt && task.alt);
+            td3.innerText = JSON.stringify(task.imag && task.imag);
+            td4.innerText = JSON.stringify(task.post_id && task.post_id);
+            td5.innerText = JSON.stringify(task.update_at && task.update_at);
+
+            item.appendChild(td);
+            item.appendChild(td1);
+            item.appendChild(td2);
+            item.appendChild(td3);
+            item.appendChild(td4);
+            item.appendChild(td5);
+
+            list.appendChild(item);
+          });
+          }
+
+          if (error) {
+            setErrorMessage(error);
+          }
+        });
+
+        await ws.addEventListener("close", () => {
+          document.querySelector("#events").innerText = "";
+          document.querySelector("#tabledb").innerText = "";
+          setErrorMessage("Closed websocket");
+          document.querySelector("#data").innerText = "Offline";
+          document.querySelector("#status").classList.add("offline");
+          document.querySelector("#status").classList.remove("online");
+        });
+      }
+
+      const url = new URL(window.location);
+      url.protocol = location.protocol.replace("http", "ws");
+      url.pathname = "/ws/";
+      websocket(url);
+
+      const closeConnection = () => ws.close();
+
+      document.querySelector("#close").addEventListener("click", closeConnection);
+
+      document.querySelector("#click").addEventListener("click", () => {
+        const getdb = document.querySelector("#inputdb").value;
+        ws.send(JSON.stringify({ data: "CLICK", getdb: getdb }));
+      });
+
+      document.querySelector("#unknown").addEventListener("click", () => {
+        const getdb = document.querySelector("#inputdb").value;
+        ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
+      });
+
+      document.querySelector("#create").addEventListener("click", () => {
+        const table1 = document.getElementById("tabledb");
+        const getdb = document.querySelector("#inputdb").value;
+        const froms = document.getElementById("from");
+        const itemth = document.createElement("tr");
+        const input = document.createElement("input");
+        const input1 = document.createElement("input");
+        const input2 = document.createElement("input");
+        const input3 = document.createElement("input");
+        const input4 = document.createElement("input");
+        const input5 = document.createElement("input");
+
+        const th = document.createElement("th");
+        const th1 = document.createElement("th");
+        const th2 = document.createElement("th");
+        const th3 = document.createElement("th");
+        const th4 = document.createElement("th");
+        const th5 = document.createElement("th");
+
+        th.innerText = "id";
+        th1.innerText = "name";
+        th2.innerText = "alt";
+        th3.innerText = "imag";
+        th4.innerText = "post_id";
+        th5.innerText = "update_at";  
+
+        const td = document.createElement("td");
+        const td1 = document.createElement("td");
+        const td2 = document.createElement("td");
+        const td3 = document.createElement("td");
+        const td4 = document.createElement("td");
+        const td5 = document.createElement("td");
+
+        input.setAttribute("type", "number");
+        input.setAttribute("id", "id");
+        input.setAttribute("placeholder", "id");
+        input1.setAttribute("type", "text");
+        input1.setAttribute("id", "name");
+        input1.setAttribute("placeholder", "name");
+        input2.setAttribute("type", "text");
+        input2.setAttribute("id", "alt");
+        input2.setAttribute("placeholder", "alt");
+        input3.setAttribute("type", "text");
+        input3.setAttribute("id", "imag");
+        input3.setAttribute("placeholder", "imag");
+        input4.setAttribute("type", "text");
+        input4.setAttribute("id", "post_id");
+        input4.setAttribute("placeholder", "post_id");
+        input5.setAttribute("type", "text");
+        input5.setAttribute("id", "update_at");
+        input5.setAttribute("placeholder", "update_at");
+
+        td.appendChild(input);
+        td1.appendChild(input1);
+        td2.appendChild(input2);
+        td3.appendChild(input3);
+        td4.appendChild(input4);
+        td5.appendChild(input5);
+
+        itemth.appendChild(th);
+        itemth.appendChild(th1);
+        itemth.appendChild(th2);
+        itemth.appendChild(th3);
+        itemth.appendChild(th4);
+        itemth.appendChild(th5);
+
+        const tr2 = document.createElement("tr");
+
+        tr2.appendChild(td);
+        tr2.appendChild(td1);
+        tr2.appendChild(td2);
+        tr2.appendChild(td3);
+        tr2.appendChild(td4);
+        tr2.appendChild(td5);
+
+        froms.appendChild(itemth);
+        froms.appendChild(tr2);
+
+        const button = document.createElement("button");
+        button.setAttribute("id", "add");
+        button.innerText = "Add";
+        table1.appendChild(button);
+
+        document.getElementById("update_at").value = new Date().toLocaleString('th-TH');
+
+        document.querySelector("#add").addEventListener("click", () => {
+          const getid = document.querySelector("#id").value;
+          const getname = document.querySelector("#name").value;
+          const getalt = document.querySelector("#alt").value;
+          const getimag = document.querySelector("#imag").value;
+          const getpost_id = document.querySelector("#post_id").value;
+          ws.send(
+            JSON.stringify({
+              data: "CREATE",
+              getdb: getdb,
+              getid: getid,
+              getname: getname,
+              getalt: getalt,
+              getimag: getimag,
+              getpost_id: getpost_id,
+            })
+          );
+        });
+
+        const button1 = document.createElement("button");
+        button1.setAttribute("id", "update");
+        button1.innerText = "Update";
+        table1.appendChild(button1);
+                
+
+        document.querySelector("#update").addEventListener("click", () => {
+          const getid = document.querySelector("#id").value;
+          const getname = document.querySelector("#name").value;
+          const getalt = document.querySelector("#alt").value;
+          const getimag = document.querySelector("#imag").value;
+          const getpost_id = document.querySelector("#post_id").value;
+          ws.send(
+            JSON.stringify({
+              data: "UPDATE",
+              getdb: getdb,
+              getid: getid,
+              getname: getname,
+              getalt: getalt,
+              getimag: getimag,
+              getpost_id: getpost_id,
+            })
+          );
+        });
+
+        const button2 = document.createElement("button");
+        button2.setAttribute("id", "delete");
+        button2.innerText = "Delete";
+        table1.appendChild(button2);
+
+        document.querySelector("#delete").addEventListener("click", () => {
+          const getid = document.querySelector("#id").value;
+          ws.send(
+            JSON.stringify({
+              data: "DELETE",
+              getdb: getdb,
+              getid: getid,
+            })
+          );
+        });
+
+        const cancel = document.createElement("button");
+        cancel.setAttribute("id", "cancel");
+        cancel.innerText = "Cancel";
+        table1.appendChild(cancel);
+
+        document.querySelector("#cancel").addEventListener("click", () => {
+          //remove element from dom
+          document.getElementById("from").remove();
+          document.getElementById("add").remove();
+          document.getElementById("update").remove();
+          document.getElementById("delete").remove();
+          document.getElementById("cancel").remove();
+        });
+        
+      });
+
+      const setErrorMessage = (message) => {
+        document.querySelector("#error").innerHTML = message ? message : "";
+      };
+    </script>
+  </body>
 </html>

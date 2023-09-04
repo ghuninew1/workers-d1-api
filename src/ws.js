@@ -2,51 +2,25 @@
 
 let count = 0;
 /** @param {WebSocket} websocket */
-async function handleSession(websocket) {
+async function handleSession(websocket,env) {
   websocket.accept();
   websocket.addEventListener("message", async (event) => {
-    // const { data, tz } = JSON.parse(event);
+    const { data, getdb } = JSON.parse(event.data);
 
-    const data = JSON.parse(event.data).data;
-    const tz = JSON.parse(event.data).time;
-    const getdb = JSON.parse(event.data).getdb;
     if (data === "GETDB") {
-      fetch(`https://api.ghuninew.workers.dev/api/${getdb}`)
-        .then((res) => res.json())
-        .then((res) => {
-          websocket.send(JSON.stringify({ tasks: res }));
-        });
-    }
-    if (data === "CLICK") {
-      count += 1;
-      websocket.send(
-        JSON.stringify({
-          count,
-          tz: new Date().toLocaleString("th"),
-          time: new Date().getTime() - tz + " ms",
-        })
-      );
-    }
-    if (data === "CLICKDOWN") {
-      count -= 1;
-      websocket.send(
-        JSON.stringify({
-          count,
-          tz: new Date().toLocaleString("th"),
-          time: new Date().getTime() - tz + " ms",
-        })
-      );
-    }
-    if (data === "RESET") {
-      count = 0;
-      websocket.send(
-        JSON.stringify({
-          count,
-          tz: new Date().toLocaleString("th"),
-          time: new Date().getTime() - tz + " ms",
-        })
-      );
-    }
+      const timeStart = Date.now();
+      const { results } = await env.DB.prepare(`SELECT * FROM ${getdb};`).all();
+      const tasks = results || [];
+      websocket.send(JSON.stringify({ tasks: tasks, time: Date.now() - timeStart }));
+        
+    } if (data === "CLICK") {
+      const timeStart = Date.now();
+      const { results } = await env.DB.prepare(
+        `select * from sqlite_master where type = 'table';`
+      ).all();
+      const tasks = results || [];
+      websocket.send(JSON.stringify({ table: tasks, time: Date.now() - timeStart }));
+    } 
   });
 
   websocket.addEventListener("close", async (evt) => {
@@ -56,14 +30,16 @@ async function handleSession(websocket) {
 }
 
 /** @param {Request} req */
-async function websocketHandler(req) {
+async function websocketHandler(req,env) {
   const upgradeHeader = req.headers.get("Upgrade");
-  if (upgradeHeader !== "websocket") {
-    return new Response("Expected websocket", { status: 400 });
+  if (!upgradeHeader || upgradeHeader !== 'websocket') {
+    return new Response('Expected Upgrade: websocket', { status: 426 });
   }
 
-  const [client, server] = Object.values(new WebSocketPair());
-  await handleSession(server);
+  // let webSocketPair = new WebSocketPair();
+  let [client, server] = Object.values(new WebSocketPair());
+
+  await handleSession(server,env);
 
   return new Response(null, {
     status: 101,
