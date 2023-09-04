@@ -20,6 +20,7 @@ async function handleSession(websocket,env) {
       ).all();
       const tasks = results || [];
       websocket.send(JSON.stringify({ table: tasks, time: Date.now() - timeStart }));
+
     } if (data === "CREATE") {
       const timeStart = Date.now();
       const { getname , getalt, getimag, getpost_id} = JSON.parse(event.data);
@@ -28,7 +29,7 @@ async function handleSession(websocket,env) {
       ).bind(getname, getalt, getimag, getpost_id).run();
       const tasks = results || [];
       if (tasks) {
-        websocket.send(JSON.stringify({ tasks: tasks, time: Date.now() - timeStart }));
+        websocket.send(JSON.stringify({ success: `Create into table ${getdb} Success!`, time: Date.now() - timeStart }));
       } else {
         websocket.send(JSON.stringify({ error: `${getdb} is not added`, time: Date.now() - timeStart }));
       }
@@ -40,9 +41,9 @@ async function handleSession(websocket,env) {
       ).bind(getname, getalt, getimag, getpost_id, getid).run();
       const tasks = results || [];
       if (tasks) {
-        websocket.send(JSON.stringify({ tasks: tasks, time: Date.now() - timeStart }));
+        websocket.send(JSON.stringify({ success: `Update table ${getdb} Success!`, time: Date.now() - timeStart }));
       } else {
-        websocket.send(JSON.stringify({ error: `${getdb} is not added`, time: Date.now() - timeStart }));
+        websocket.send(JSON.stringify({ error: `${getdb} is not update`, time: Date.now() - timeStart }));
       }
     } if (data === "DELETE") {
       const timeStart = Date.now();
@@ -52,9 +53,9 @@ async function handleSession(websocket,env) {
       ).bind(getid).run();
       const tasks = results || [];
       if (tasks) {
-        websocket.send(JSON.stringify({ tasks: tasks, time: Date.now() - timeStart }));
+        websocket.send(JSON.stringify({ success: `Delete id ${getid} from ${getdb} Success!`, time: Date.now() - timeStart }));
       } else {
-        websocket.send(JSON.stringify({ error: `${getdb} is not added`, time: Date.now() - timeStart }));
+        websocket.send(JSON.stringify({ error: `${getdb} is not delete`, time: Date.now() - timeStart }));
       }
     }
   });

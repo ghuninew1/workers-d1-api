@@ -18,16 +18,14 @@
       rel="manifest"
       href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/manifest.json"
     />
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <title>GhuniNew</title>
 
     <style>
       body {
-        place-items: center;
         margin: 0;
         padding: 0;
         font-family: tahoma, sans-serif;
-        font-size: 14px;
       }
 
       * {
@@ -40,204 +38,112 @@
         list-style: none;
       }
 
-      .info {
+      #data {
+        font-size: 22px;
+        font-weight: 700;
         text-align: center;
-        padding: 10px;
-        margin: 0 auto;
-        align-items: center;
-        width: 100%;
-        max-width: 900px;
-        transition: 0.5s;
       }
-
-      .info #status {
-        height: 15px;
-        width: 15px;
-        background-color: #bbb;
-        border-radius: 50%;
-        display: inline-block;
-      }
-
-      .info #status.online {
+      .online {
         background-color: green;
       }
-
-      .info #status.offline {
+      .offline {
         background-color: red;
-      }
+      }   
 
-      .info .online {
-        color: green;
+      #inputdb{
+        margin: 10px;
+        width: 80px;
+        transition: 0.5s ease-in-out;
+        padding: 0;
       }
-
-      .info .offline {
-        color: red;
-      }
-
-      section {
-        margin: 0 auto;
-        align-items: center;
-        transition: 0.5s;
+      #inputdb:focus{
+        outline: 2px solid palevioletred;
+        width: 120%;
+        transition: 0.5s ease-in-out;
       }
 
       button {
-        background-color: #00532f;
-        border: none;
-        padding: 8px;
-        margin: 5px;
+        margin: 0;
+      }
+      #btndb{
+        display: none;
+      }
+      #close{
+        display: none;
+      }
+      #fromtbody{
         text-align: center;
-        text-decoration: none;
-        border-radius: 8px;
-        cursor: pointer;
-        color: #fff;
-        font-weight: 600;
-        transition: 0.3s;
-      }
-
-      button:last-child {
-        background-color: #eb3820;
-        color: #000;
-      }
-
-      button:hover {
-        background-color: #00885d20;
-        outline: 3px solid #dd5608;
-        color: #000;
-      }
-
-      .data {
-        font-size: 18px;
-        color: #00885d;
-        margin-bottom: 10px;
-        text-align: center;
-      }
-      .status {
         align-items: center;
-        text-align: center;
+        justify-content: center;
+      }
+      .container-table {
+        display: flex;
+        flex-direction: column;
+        width: 80%;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
         padding: 10px;
-        margin: 0 auto;
-        font-size: 20px;
-        font-weight: 700;
       }
-
-      .event {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        padding: 0;
-        margin-top: 10px;
-        transition: 0.3s;
-        visibility: hidden;
+      tr th {
+        background-color: #656363 !important;
+        color: #fff !important;
       }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin: 5px;
-        border: 1px solid #ddd;
-        max-width: 900px;
-        align-items: center;
-        justify-content: center;
-        transition: 0.5s;
-      }
-      table thead {
-        background-color: #544b41;
-        color: #847e7e;
-      }
-      table thead th {
-        padding: 0;
-        text-align: center;
-      }
-      table tbody tr:nth-child(odd) {
-        background-color: #eee;
-      }
-      table tbody tr:nth-child(even) {
-        background-color: #fff;
-      }
-      table tbody td {
-        padding: 0;
-        text-align: center;
-      }
-      table tbody td:nth-child(1) {
-        text-align: left;
-      }
-      .bbtn {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        margin: 0 auto;
-        padding: 0;
-        margin-top: 10px;
-        transition: 0.5s;
-      }
-      input{
-        padding: 5px;
-        margin: 5px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        width: 80px;
-        transition: 0.5s;
-      }
-      input:focus{
-        outline: 3px solid #dd5608;
-        width: 100px;
-        transition: 0.5s;
-      }
-      #btconnect{
-        transition: 0.5s;
-      }
-      #tabledb{
-        transition: 0.5s;
-      }
-      #tabledb span {
-        padding: 5px;
-        margin: 5px;
-        border: 1px solid #ddd;
-        transition: 0.5s;
-      }
-
     </style>
   </head>
 
   <body>
-    <main class="info2">
-      <div class="info">
+    <main >
+      <div class="container text-center">
         <h1 >API GNEW</h1>
         <br />
-        <div class="data" >
-          <span id="data">...Connecting</span>&nbsp;
-          <span id="status"></span>
+        <div class="container-fluid" >
+          <span id="data" >...Connecting</span>&nbsp;
+          <span id="status" class="spinner-border "></span>
           <span id="res"></span>
         </div>
         <div>
           <p id="date"></p>
-          <p id="error" style="color: red"></p>
         </div>
 
-        <section class="event">
-          
-          <input type="text" id="inputdb" onchange="(e)=>{e.target.value}" />
-          <button id="get">Get</button>          
-          <button id="getdb">Get DB</button>
-          <button id="create">Add DB</button>
-        </section>
+
         <div id="btconnect">
-          <button id="open">Connect</button>
-          <button id="close">Close</button>
+          <button id="open" class="btn btn-success btn-lg">Connect</button>
+          <button id="close" class="btn btn-danger btn-lg">Close</button>
         </div>
-        <section id="tabledb">
-        </section>
-        <hr />
-          <table >
-            <thead id="from">
-              <tbody id="fromtbody"></tbody>
-            </thead>
-            <tbody id="events"></tbody>
-          </table>
+
+        <div class="col align-items-md-center" id="btndb">
+          <div class="col-md-4">
+            <input class="form-control " type="text" id="inputdb" onchange="(e)=>{e.target.value}" />
+          </div>
+          <button id="get"class="btn btn-outline-primary" >Get Tb</button>          
+          <button id="getdb" class="btn btn-outline-secondary">Get DB</button>
+
+          <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+            <button id="add"  type="button" class="btn btn-danger">Add</button>
+            <button id="update" type="button" class="btn btn-warning">Edit</button>
+            <button id="delete" type="button" class="btn btn-success">Del</button>
+          </div>
+
+          <button id="cancel" class="btn btn-outline-dark">Reset</button>
+          <hr />
+          <section id="tabledb">
+            <p id="success" style="color: green"></p>
+            <p id="error" style="color: red"></p>
+          </section>
+        </div>
       </div>
     </main>
+    <div class="container-table">
+        <table class="table table-responsive-sm table-hover">
+          <thead >
+            <tbody id="fromtbody" class="table-responsive"></tbody>
+            <tbody id="from" class="table-responsive"></tbody>
+          </thead>
+          <tbody id="events"></tbody>
+        </table>
+      </div>
+
     <footer style="text-align: center;">
       <span style="font-size: small;">© 2023 GhuniNew</span>
     </footer>
@@ -249,7 +155,6 @@
       const closeId = document.querySelector("#close");
       const getId = document.querySelector("#get");
       const getdbId = document.querySelector("#getdb");
-      const createId = document.querySelector("#create");
       const updateId = document.querySelector("#update");
       const deleteId = document.querySelector("#delete");
       const cancelId = document.querySelector("#cancel");
@@ -265,6 +170,8 @@
       const dateId = document.querySelector("#date");
       const errorId = document.querySelector("#error");
       const btconnectId = document.querySelector("#btconnect");
+      const btndbId = document.querySelector("#btndb");
+      const successId = document.querySelector("#success");
 
       async function websocket(url) {
         ws = new WebSocket(url);
@@ -279,14 +186,29 @@
         });
 
         await ws.addEventListener("message", ({ data }) => {
-          const { time, tasks, table, error } = JSON.parse(data);
+          const { time, tasks, table, success, error } = JSON.parse(data);
           resId.innerText = Number(time).toFixed(2) + " ms";
 
+          console.log("Received message", success);
+
+          if(success){
+            document.querySelector("#success").innerText = success;
+          }
+
           if (table) {
+
             table.forEach((tb) => {
-              const item = document.createElement("span");
-              item.innerText = JSON.stringify(tb.name ? tb.rootpage + ": " + tb.name  : table);
-              eventsId.prepend(item);
+              const list = document.createElement("tr");
+              const item = document.createElement("th");
+              const item2 = document.createElement("th");
+              const item3 = document.createElement("th");
+              item.innerText = JSON.stringify(tb.rootpage);
+              item2.innerText = JSON.stringify(tb.name);
+              item3.innerText = JSON.stringify(tb.sql);
+              list.appendChild(item);
+              list.appendChild(item2);
+              list.appendChild(item3);
+              eventsId.appendChild(list);
             });
           }
           if (tasks) {
@@ -336,7 +258,7 @@
 
             eventsId.appendChild(item);
           });
-          }
+          } 
 
           if (error) {
             setErrorMessage(error);
@@ -353,21 +275,25 @@
       url.protocol = location.protocol.replace("http", "ws");
       url.pathname = "/ws/";
       // websocket(url);
+      // const url = "wss://api.bigbrain-studio.com/ws/";
 
       
       getId.onclick = () => {
+        tableReset();
         const getdb = document.querySelector("#inputdb").value;
         ws.send(JSON.stringify({ data: "GET", getdb: getdb }));
       };
 
       getdbId.onclick = () => {
+        tableReset();
         const getdb = document.querySelector("#inputdb").value;
         ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
       };
 
-      createId.onclick = () => {
+      const createId = () => {
         const getdb = document.querySelector("#inputdb").value;
         const itemth = document.createElement("tr");
+        const fromBodytr = document.createElement("tr");
         const input = document.createElement("input");
         const input1 = document.createElement("input");
         const input2 = document.createElement("input");
@@ -381,6 +307,22 @@
         const th3 = document.createElement("th");
         const th4 = document.createElement("th");
         const th5 = document.createElement("th");
+
+        th.innerText = "id";
+        th1.innerText = "name";
+        th2.innerText = "alt";
+        th3.innerText = "imag";
+        th4.innerText = "post_id";
+        th5.innerText = new Date().toLocaleString('th-TH');
+
+        fromBodytr.appendChild(th);
+        fromBodytr.appendChild(th1);
+        fromBodytr.appendChild(th2);
+        fromBodytr.appendChild(th3);
+        fromBodytr.appendChild(th4);
+        fromBodytr.appendChild(th5);
+
+        fromtbodyId.appendChild(fromBodytr);
 
         const td = document.createElement("td");
         const td1 = document.createElement("td");
@@ -411,9 +353,7 @@
         input4.setAttribute("id", "post_id");
         input4.setAttribute("placeholder", "post_id");
         input4.setAttribute("onchange", "(e)=>{e.target.value}");
-        // input5.setAttribute("type", "text");
         input5.setAttribute("id", "update_at");
-        // input5.setAttribute("placeholder", "update_at");
 
         td.appendChild(input);
         td1.appendChild(input1);
@@ -421,13 +361,6 @@
         td3.appendChild(input3);
         td4.appendChild(input4);
         td5.appendChild(input5);
-
-        itemth.appendChild(th);
-        itemth.appendChild(th1);
-        itemth.appendChild(th2);
-        itemth.appendChild(th3);
-        itemth.appendChild(th4);
-        itemth.appendChild(th5);
 
         const tr2 = document.createElement("tr");
 
@@ -440,16 +373,10 @@
 
         fromId.appendChild(itemth);
         fromId.appendChild(tr2);
+      };
 
-        const button = document.createElement("button");
-        button.setAttribute("id", "add");
-        button.innerText = "Add";
-        tabledbId.appendChild(button);
-
-        document.getElementById("update_at").innerText = new Date().toLocaleString('th-TH');
-
-        button.onclick = () => {
-          const getid = document.querySelector("#id").value;
+        const addTable = () => {
+          const getdb = document.querySelector("#inputdb").value;
           const getname = document.querySelector("#name").value;
           const getalt = document.querySelector("#alt").value;
           const getimag = document.querySelector("#imag").value;
@@ -458,7 +385,6 @@
             JSON.stringify({
               data: "CREATE",
               getdb: getdb,
-              getid: getid,
               getname: getname,
               getalt: getalt,
               getimag: getimag,
@@ -467,12 +393,23 @@
           );
         };
 
-        const button1 = document.createElement("button");
-        button1.setAttribute("id", "update");
-        button1.innerText = "Update";
-        tabledbId.appendChild(button1);
+        addId.onclick = () => {
+          tableReset();
+          createId();
+          const button = document.createElement("button");
+          button.setAttribute("id", "addtable");
+          button.innerText = "Add Now";
+          document.querySelector("#update_at").appendChild(button);
+          document.querySelector("#id").setAttribute("disabled", "disabled");
+          button.setAttribute("class", "btn btn-outline-success");
 
-        button1.onclick = () => {
+          button.onclick = () => {
+            addTable();
+          };
+        };
+        
+        const updateTable = ()=>{
+          const getdb = document.querySelector("#inputdb").value;
           const getid = document.querySelector("#id").value;
           const getname = document.querySelector("#name").value;
           const getalt = document.querySelector("#alt").value;
@@ -491,12 +428,22 @@
           );
         };
 
-        const button2 = document.createElement("button");
-        button2.setAttribute("id", "delete");
-        button2.innerText = "Delete";
-        tabledbId.appendChild(button2);
+        updateId.onclick = () => {
+          tableReset();
+          createId();
+          const button = document.createElement("button");
+          button.setAttribute("id", "updatetable");
+          button.innerText = "Update Now";
+          document.querySelector("#update_at").appendChild(button);
+          button.setAttribute("class", "btn btn-outline-success");
 
-        button2.onclick = () => {
+          button.onclick = () => {
+            updateTable();
+          };
+        };
+
+        const deleteTable = () => {
+          const getdb = document.querySelector("#inputdb").value;
           const getid = document.querySelector("#id").value;
           ws.send(
             JSON.stringify({
@@ -507,12 +454,25 @@
           );
         };
 
-        const cancel = document.createElement("button");
-        cancel.setAttribute("id", "cancel");
-        cancel.innerText = "Cancel";
-        tabledbId.appendChild(cancel);
+        deleteId.onclick = () => {
+          tableReset();
+          createId();
+          const button = document.createElement("button");
+          button.setAttribute("id", "deletetable");
+          button.innerText = "Delete Now";
+          document.querySelector("#update_at").appendChild(button);
+          document.querySelector("#name").setAttribute("disabled", "disabled");
+          document.querySelector("#alt").setAttribute("disabled", "disabled");
+          document.querySelector("#imag").setAttribute("disabled", "disabled");
+          document.querySelector("#post_id").setAttribute("disabled", "disabled");
+          button.setAttribute("class", "btn btn-outline-success");
 
-        cancel.onclick = () => {
+          button.onclick = () => {
+            deleteTable();
+          };
+        };
+
+        const tableReset =()=> {
           if (fromId.childNodes.length > 0) {
             while (fromId.firstChild) {
               fromId.removeChild(fromId.firstChild);
@@ -533,40 +493,57 @@
               tabledbId.removeChild(tabledbId.firstChild);
             }
           } 
+        }
+
+        cancelId.onclick = () => {
+          tableReset();
         };
-      };
-    
+
       //websocket reconnect
       openId.onclick = () => {
         websocket(url);
         isConnect();
+        tableReset();
       };
 
       closeId.onclick = () => {
         ws.close();
         ws = null;
         disConnect();
+        tableReset();
       };
 
       const isConnect = () =>{
         dataId.innerText = "Online";
+        dataId.style.color = "green";
+        statusId.classList.add("text-success");
         statusId.classList.add("online");
         statusId.classList.remove("offline");
-        document.querySelector(".event").setAttribute("style", "visibility: visible;");
+        statusId.classList.remove("text-danger");
+        btndbId.style.display = "inline-block";
         dateId.innerText = new Date().toLocaleString('th-TH');
         btconnectId.classList.add("bbtn");
+        btndbId.style.display = "inline-block";
+        closeId.style.display = "inline-block";
+        openId.style.display = "none";
+        inputdbId.setAttribute("placeholder", "Search DB");
       }
       const disConnect =() => {
         dataId.innerText = "Offline";
+        dataId.style.color = "red";
+        statusId.classList.add("text-danger");
         statusId.classList.add("offline");
         statusId.classList.remove("online");
-        document.querySelector(".event").setAttribute("style", "visibility: hidden;");
+        statusId.classList.remove("text-success");
+        eventsId.style.display = "none";
         btconnectId.classList.remove("bbtn");
         errorId.innerText = "";
         dateId.innerText = "";
         eventsId.innerText = "";
         tabledbId.innerText = "";
-
+        btndbId.style.display = "none";
+        closeId.style.display = "none";
+        openId.style.display = "inline-block";
       }
 
       const setErrorMessage = (message) => {

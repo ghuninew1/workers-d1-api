@@ -78,11 +78,7 @@ export default {
         .bind(name, alt, imag, post_id)
         .run();
       const tasks = results || [];
-      if (tasks) {
-        return c.json({ message: `${db_name} is added` });
-      } else {
-        return c.json({ message: `${db_name} is not added` });
-      }
+        return c.json({ message: `${db_name} is added ${tasks}` });
     });
 
     app.get("/api/:db_name/:id", async (c) => {
