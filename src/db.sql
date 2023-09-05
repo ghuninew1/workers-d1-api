@@ -1,12 +1,13 @@
 -- drop table if exists data2;
 
 create table if not exists data (
-	id integer primary key autoincrement,
-	name text not null,
-	alt text not null,
-	imag text not null,
-	post_id text not null,
-	update_at text not null default (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime'))
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name TEXT NOT NULL,
+	alt TEXT NOT NULL,
+	imag TEXT NOT NULL,
+	post_id INTEGER NOT NULL,
+	created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')),
+	update_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')) ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_data_post_id ON data(post_id);
@@ -15,7 +16,10 @@ INSERT INTO data(name, alt, imag, post_id) VALUES ("test1", "test1", "test1", 1)
 CREATE TABLE tasks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   created_at TIMESTAMP DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime')),
+--   update_at TIMESTAMP DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime')) ON UPDATE CURRENT_TIMESTAMP,
   done BOOLEAN DEFAULT 0
 );
 

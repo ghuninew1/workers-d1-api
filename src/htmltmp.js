@@ -1,4 +1,4 @@
-export let htmltmp = (request, starttime) => `
+export let htmltmp = (request) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,7 +57,6 @@ p{
 <body>
     <h1><a href="/">GhuniNew</a></h1>
     <p>Time : ${new Date().toLocaleString(`th-TH`)}</p>
-    <p>resTime : ${Date.now() - starttime + "ms"}</p>
     <p>ip_cf : ${request.headers.get("cf-connecting-ip")}</p>
     <p>url : <a href=${request.url}>${request.url}</a></p>
     <p>url : <a href=${request.url}api>${request.url}api</a></p>

@@ -19,6 +19,7 @@
       href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/manifest.json"
     />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    
     <title>GhuniNew</title>
 
     <style>
@@ -51,14 +52,15 @@
       }   
 
       #inputdb{
-        margin: 10px;
-        width: 80px;
+        margin: 20px 0px;
         transition: 0.5s ease-in-out;
         padding: 0;
+        height: 25px;
       }
       #inputdb:focus{
         outline: 2px solid palevioletred;
-        width: 120%;
+        outline-offset: 2px;
+        height: 40px;
         transition: 0.5s ease-in-out;
       }
 
@@ -67,6 +69,7 @@
       }
       #btndb{
         display: none;
+        margin: 10px 0px;
       }
       #close{
         display: none;
@@ -89,6 +92,12 @@
         background-color: #656363 !important;
         color: #fff !important;
       }
+      #cancel {
+        display: none
+      }
+      #tabledb{
+        margin: 10px 0px;
+      }
     </style>
   </head>
 
@@ -97,7 +106,7 @@
       <div class="container text-center">
         <h1 >API GNEW</h1>
         <br />
-        <div class="container-fluid" >
+        <div class="container" >
           <span id="data" >...Connecting</span>&nbsp;
           <span id="status" class="spinner-border "></span>
           <span id="res"></span>
@@ -112,33 +121,33 @@
           <button id="close" class="btn btn-danger btn-lg">Close</button>
         </div>
 
-        <div class="col align-items-md-center" id="btndb">
-          <div class="col-md-4">
+        <div id="btndb">
+          <div >
             <input class="form-control " type="text" id="inputdb" onchange="(e)=>{e.target.value}" />
           </div>
           <button id="get"class="btn btn-outline-primary" >Get Tb</button>          
           <button id="getdb" class="btn btn-outline-secondary">Get DB</button>
-
           <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-            <button id="add"  type="button" class="btn btn-danger">Add</button>
+            <button id="add"  type="button" class="btn btn-success">Add</button>
             <button id="update" type="button" class="btn btn-warning">Edit</button>
-            <button id="delete" type="button" class="btn btn-success">Del</button>
+            <button id="delete" type="button" class="btn btn-danger">Del</button>
           </div>
 
-          <button id="cancel" class="btn btn-outline-dark">Reset</button>
-          <hr />
           <section id="tabledb">
             <p id="success" style="color: green"></p>
             <p id="error" style="color: red"></p>
           </section>
+          
+          <button id="cancel" class="btn btn-outline-dark">Reset</button>
+
         </div>
       </div>
     </main>
     <div class="container-table">
         <table class="table table-responsive-sm table-hover">
           <thead >
-            <tbody id="fromtbody" class="table-responsive"></tbody>
-            <tbody id="from" class="table-responsive"></tbody>
+            <tbody id="fromtbody" ></tbody>
+            <tbody id="from" ></tbody>
           </thead>
           <tbody id="events"></tbody>
         </table>
@@ -189,10 +198,14 @@
           const { time, tasks, table, success, error } = JSON.parse(data);
           resId.innerText = Number(time).toFixed(2) + " ms";
 
-          console.log("Received message", success);
-
           if(success){
-            document.querySelector("#success").innerText = success;
+            const successIds = document.createElement("p");
+            successIds.innerText = success;
+            tabledbId.appendChild(successIds);
+
+            setTimeout(() => {
+              tabledbId.removeChild(successIds);
+            }, 3000);
           }
 
           if (table) {
@@ -268,6 +281,7 @@
         await ws.addEventListener("close", () => {
           console.log("Closed websocket");
           disConnect();
+          tableReset();
         });
       }
 
@@ -375,6 +389,15 @@
         fromId.appendChild(tr2);
       };
 
+      const clearValue = () => {
+        document.querySelector("#id").value = "";
+        document.querySelector("#name").value = "";
+        document.querySelector("#alt").value = "";
+        document.querySelector("#imag").value = "";
+        document.querySelector("#post_id").value = "";
+        document.querySelector("#cancel").style.display = "none";
+      };
+
         const addTable = () => {
           const getdb = document.querySelector("#inputdb").value;
           const getname = document.querySelector("#name").value;
@@ -391,6 +414,8 @@
               getpost_id: getpost_id,
             })
           );
+          //clear input value
+          clearValue();
         };
 
         addId.onclick = () => {
@@ -402,6 +427,7 @@
           document.querySelector("#update_at").appendChild(button);
           document.querySelector("#id").setAttribute("disabled", "disabled");
           button.setAttribute("class", "btn btn-outline-success");
+          document.querySelector("#cancel").style.display = "inline-block";
 
           button.onclick = () => {
             addTable();
@@ -426,6 +452,8 @@
               getpost_id: getpost_id,
             })
           );
+          //clear input value
+          clearValue();
         };
 
         updateId.onclick = () => {
@@ -436,6 +464,7 @@
           button.innerText = "Update Now";
           document.querySelector("#update_at").appendChild(button);
           button.setAttribute("class", "btn btn-outline-success");
+          document.querySelector("#cancel").style.display = "inline-block";
 
           button.onclick = () => {
             updateTable();
@@ -452,6 +481,8 @@
               getid: getid,
             })
           );
+          //clear input value
+          clearValue();
         };
 
         deleteId.onclick = () => {
@@ -466,6 +497,7 @@
           document.querySelector("#imag").setAttribute("disabled", "disabled");
           document.querySelector("#post_id").setAttribute("disabled", "disabled");
           button.setAttribute("class", "btn btn-outline-success");
+          document.querySelector("#cancel").style.display = "inline-block";
 
           button.onclick = () => {
             deleteTable();
@@ -473,6 +505,9 @@
         };
 
         const tableReset =()=> {
+
+          document.querySelector("#cancel").style.display = "none";
+
           if (fromId.childNodes.length > 0) {
             while (fromId.firstChild) {
               fromId.removeChild(fromId.firstChild);
@@ -521,9 +556,9 @@
         statusId.classList.remove("offline");
         statusId.classList.remove("text-danger");
         btndbId.style.display = "inline-block";
+        // btndbId.style.flexDirection = "column";
         dateId.innerText = new Date().toLocaleString('th-TH');
         btconnectId.classList.add("bbtn");
-        btndbId.style.display = "inline-block";
         closeId.style.display = "inline-block";
         openId.style.display = "none";
         inputdbId.setAttribute("placeholder", "Search DB");
@@ -532,7 +567,7 @@
         dataId.innerText = "Offline";
         dataId.style.color = "red";
         statusId.classList.add("text-danger");
-        statusId.classList.add("offline");
+        // statusId.classList.add("offline");
         statusId.classList.remove("online");
         statusId.classList.remove("text-success");
         eventsId.style.display = "none";

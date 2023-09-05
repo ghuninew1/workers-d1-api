@@ -10,22 +10,21 @@ export default {
   async fetch(request, env, ctx) {
     const app = new Hono();
 
-    const timeStart = Date.now();
     
     // Mount Builtin Middlewar
     app.use(etag()), cors({ origin: "*" });
 
     app.use("*", async (c, next) => {
-      
-      const end_time = Date.now();
+      const timeStart = Date.now();
       await next();
-      const totalTimeInMs = end_time - timeStart;
-      c.res.headers.set("X-Response-Time", `${totalTimeInMs} ms`);
+      const timeEnd = Date.now();
+      const time = timeEnd - timeStart;
+      c.res.headers.set("X-Response-Time", `${time}ms`);
       c.res.headers.set("Access-Allow-Origin", "*");
       c.res.headers.set("X-powered-By", `GhuniNew`);
     });
 
-    app.get("/", async (c) => c.html(htmltmp(request, timeStart)));
+    app.get("/", async (c) => c.html(htmltmp(request)));
 
     app.get("/ws", async (c) => c.html(template));
 
