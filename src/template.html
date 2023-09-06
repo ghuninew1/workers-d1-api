@@ -41,7 +41,6 @@
 
       #data {
         font-size: 22px;
-        font-weight: 700;
         text-align: center;
       }
       .online {
@@ -53,23 +52,26 @@
 
       #inputdb{
         margin: 20px 0px;
-        transition: 0.5s ease-in-out;
+        transition: 0.2s ease-in-out;
         padding: 0;
-        height: 25px;
+        height: 20px;
       }
       #inputdb:focus{
         outline: 2px solid palevioletred;
         outline-offset: 2px;
-        height: 40px;
-        transition: 0.5s ease-in-out;
+        height: 30px;
+        transition: 0.2s ease-in-out;
       }
 
       button {
-        margin: 0;
+        margin: 5px;
       }
       #btndb{
         display: none;
         margin: 10px 0px;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
       }
       #close{
         display: none;
@@ -79,18 +81,25 @@
         align-items: center;
         justify-content: center;
       }
-      .container-table {
+      .header {
         display: flex;
-        flex-direction: column;
-        width: 80%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin: 10px 0px;
+        padding: 0;
+        transition: 0.3s;
+      }
+      .header2 {
+        display: flex;
+        flex-direction: row;
         align-items: center;
         justify-content: center;
-        margin: auto;
-        padding: 10px;
-      }
-      tr th {
-        background-color: #656363 !important;
-        color: #fff !important;
+        width: 100%;
+        margin: 10px 0px;
+        padding: 0;
+        transition: 0.3s;
       }
       #cancel {
         display: none
@@ -98,20 +107,20 @@
       #tabledb{
         margin: 10px 0px;
       }
+
     </style>
   </head>
 
   <body>
     <main >
-      <div class="container text-center">
-        <h1 >API GNEW</h1>
+      <div class="container-fluid">
+        <h1 class="text-center" >API GNEW</h1>
         <br />
-        <div class="container" >
+        <div class="header2" id="header">
+        <div  >
           <span id="data" >...Connecting</span>&nbsp;
           <span id="status" class="spinner-border "></span>
           <span id="res"></span>
-        </div>
-        <div>
           <p id="date"></p>
         </div>
 
@@ -119,6 +128,7 @@
           <button id="open" class="btn btn-success btn-lg">Connect</button>
           <button id="close" class="btn btn-danger btn-lg">Close</button>
         </div>
+      </div>
 
         <div id="btndb">
           <div class="d-sm-table-cell">
@@ -143,11 +153,9 @@
         </div>
       </div>
     </main>
-    <div class="container-table">
-        <table class="table table-responsive-sm table-hover">
-          <thead >
-            <!-- <tbody id="fromtbody" ></tbody> -->
-            <tbody id="from" ></tbody>
+    <div >
+        <table class="table table-group-divider">
+          <thead id="from" >
           </thead>
           <tbody id="events"></tbody>
         </table>
@@ -160,24 +168,24 @@
     <script>
       let ws;
 
-      const openId = document.querySelector("#open");
-      const closeId = document.querySelector("#close");
-      const getId = document.querySelector("#get");
-      const getdbId = document.querySelector("#getdb");
-      const cancelId = document.querySelector("#cancel");
-      const addId = document.querySelector("#add");
-      const inputdbId = document.querySelector("#inputdb");
-      const tabledbId = document.querySelector("#tabledb");
-      const fromId = document.querySelector("#from");
-      const eventsId = document.querySelector("#events");
-      const dataId = document.querySelector("#data");
-      const statusId = document.querySelector("#status");
-      const resId = document.querySelector("#res");
-      const dateId = document.querySelector("#date");
-      const errorId = document.querySelector("#error");
-      const btconnectId = document.querySelector("#btconnect");
-      const btndbId = document.querySelector("#btndb");
-      const successId = document.querySelector("#success");
+      let openId = document.querySelector("#open");
+      let closeId = document.querySelector("#close");
+      let getId = document.querySelector("#get");
+      let getdbId = document.querySelector("#getdb");
+      let cancelId = document.querySelector("#cancel");
+      let addId = document.querySelector("#add");
+      let inputdbId = document.querySelector("#inputdb");
+      let tabledbId = document.querySelector("#tabledb");
+      let fromId = document.querySelector("#from");
+      let eventsId = document.querySelector("#events");
+      let dataId = document.querySelector("#data");
+      let statusId = document.querySelector("#status");
+      let resId = document.querySelector("#res");
+      let dateId = document.querySelector("#date");
+      let errorId = document.querySelector("#error");
+      let btconnectId = document.querySelector("#btconnect");
+      let btndbId = document.querySelector("#btndb");
+      let successId = document.querySelector("#success");
 
       async function websocket(url) {
         ws = new WebSocket(url);
@@ -307,9 +315,9 @@
             deleteBtn.setAttribute("class", "btn btn-danger");
             td.style.display = "inline-flex";
             td.setAttribute("class", "btn-group");
-            item.setAttribute("id", "task"+task.id);
+            // item.setAttribute("id", "task"+task.id);
 
-            eventsId.appendChild(item);
+            fromId.appendChild(item);
 
             editBtn.onclick = () => {
               tableReset();
@@ -326,17 +334,19 @@
                 input.setAttribute("value", task.name ? task.name : "");
                 input.setAttribute("onchange", "(e)=>{e.target.value}");
                 td.appendChild(input);
+                // td.innerText = "name"
                 itemtr.appendChild(td);
               }
               if (task.alt || task.value) {
                 const td = document.createElement("td");
                 const input = document.createElement("input");
-                input.setAttribute("type", "text");
+                input.setAttribute("type", task.alt ? "text" : "number");
                 input.setAttribute("id", "alt");
                 input.setAttribute("placeholder", task.alt ? "alt" : "value");
                 input.setAttribute("value", task.alt ? task.alt : task.value);
                 input.setAttribute("onchange", "(e)=>{e.target.value}");
                 td.appendChild(input);
+                // td.innerText = task.alt ? "alt" : "value"
                 itemtr.appendChild(td);
               }
               if (task.imag) {
@@ -348,17 +358,19 @@
                 input.setAttribute("value", task.imag ? task.imag : "");
                 input.setAttribute("onchange", "(e)=>{e.target.value}");
                 td.appendChild(input);
+                // td.innerText = "imag"
                 itemtr.appendChild(td);
               }
               if (task.post_id) {
                 const td = document.createElement("td");
                 const input = document.createElement("input");
-                input.setAttribute("type", "text");
+                input.setAttribute("type", "number");
                 input.setAttribute("id", "post_id");
                 input.setAttribute("placeholder", "post_id");
                 input.setAttribute("value", task.post_id ? task.post_id : "");
                 input.setAttribute("onchange", "(e)=>{e.target.value}");
                 td.appendChild(input);
+                // td.innerText = "post_id"
                 itemtr.appendChild(td);
               }
               if (task.update_at || task.created_at) {
@@ -369,15 +381,14 @@
                 upButton.setAttribute("id", "update_at");
                 td.appendChild(upButton);
                 itemtr.appendChild(td);
-              }
 
-              const upButton = document.querySelector("#update_at");
+                upButton.onclick = () => {
+                  updateTable(task.id);
+                }
+              }
 
               fromId.appendChild(itemtr);
 
-              upButton.onclick = () => {
-                updateTable(task.id);
-              }  
             };
 
             deleteBtn.onclick = () => {
@@ -412,13 +423,12 @@
       
       getId.onclick = () => {
         tableReset();
-        // const getdb = document.querySelector("#inputdb").value;
         ws.send(JSON.stringify({ data: "GET"}));
       };
 
       getdbId.onclick = () => {
         const getdb = document.querySelector("#inputdb").value;
-        if ( getdb !== null || getdb !== undefined || getdb !== "") {
+        if ( getdb !== "") {
           tableReset();
           ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
         } else {
@@ -428,7 +438,7 @@
 
       const dataRefresh = () => {
         const getdb = document.querySelector("#inputdb").value;
-        if (getdb !== null || getdb !== undefined || getdb !== "") {
+        if (getdb !== "") {
           ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
         } else {
           errorId.innerText = "Enter name of database";
@@ -481,6 +491,11 @@
           addbutton.innerText = "Add Now";
           addbutton.setAttribute("class", "btn btn-outline-success");
 
+          td1.innerText = "name";
+          td2.innerText = "alt";
+          td3.innerText = "imag";
+          td4.innerText = "post_id";
+
           td1.appendChild(input1);
           td2.appendChild(input2);
           td3.appendChild(input3);
@@ -517,7 +532,7 @@
           input1.setAttribute("placeholder", "name");
           input1.setAttribute("onchange", "(e)=>{e.target.value}");
 
-          input2.setAttribute("type", "text");
+          input2.setAttribute("type", "number");
           input2.setAttribute("id", "vistvalue");
           input2.setAttribute("placeholder", "value");
           input2.setAttribute("onchange", "(e)=>{e.target.value}");
@@ -529,6 +544,9 @@
           td1.appendChild(input1);
           td2.appendChild(input2);
           td3.appendChild(vistadd);
+
+          td1.innerText = "name";
+          td2.innerText = "value";
 
           itemth.appendChild(td1);
           itemth.appendChild(td2);
@@ -634,6 +652,9 @@
             dataRefresh();
           }, 1000);
         }
+        else {
+          errorId.innerText = "Enter name of database";
+        }
 
       };
 
@@ -700,12 +721,14 @@
         statusId.classList.add("online");
         statusId.classList.remove("offline");
         statusId.classList.remove("text-danger");
-        btndbId.style.display = "inline-flex";
+        btndbId.style.display = "flex";
         dateId.innerText = new Date().toLocaleString('th-TH');
         btconnectId.classList.add("bbtn");
         closeId.style.display = "inline-flex";
         openId.style.display = "none";
         inputdbId.setAttribute("placeholder", "Search DB");
+        document.querySelector("#header").classList.add("header");
+        document.querySelector("#header").classList.remove("header2");
       }
       const disConnect =() => {
         dataId.innerText = "Offline";
@@ -724,6 +747,8 @@
         closeId.style.display = "none";
         openId.style.display = "inline-flex";
         inputdbId.value = "";
+        document.querySelector("#header").classList.add("header2");
+        document.querySelector("#header").classList.remove("header" );
       }
 
       // const setErrorMessage = (message) => {
