@@ -13,15 +13,17 @@ create table if not exists data (
 CREATE INDEX IF NOT EXISTS idx_data_post_id ON data(post_id);
 INSERT INTO data(name, alt, imag, post_id) VALUES ("test1", "test1", "test1", 1);
 
-CREATE TABLE tasks (
+CREATE TABLE vist (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title TEXT NOT NULL,
+  name TEXT NOT NULL,
+  value INTEGER NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+);
+INSERT INTO vist(name, value) VALUES ("test1", 1);
+INSERT INTO vist (name, value) VALUES ('test', 1);
+
 --   created_at TIMESTAMP DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime')),
 --   update_at TIMESTAMP DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime')) ON UPDATE CURRENT_TIMESTAMP,
-  done BOOLEAN DEFAULT 0
-);
 
 DROP TABLE IF EXISTS Customers;
 CREATE TABLE Customers (CustomerID INT, CompanyName TEXT, ContactName TEXT, PRIMARY KEY (`CustomerID`));

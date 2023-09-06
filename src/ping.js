@@ -2,9 +2,8 @@ const heaDer = {
   "content-type": "application/json;charset=UTF-8",
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-  "Cache-Control": "max-age=60",
+  "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  "Cache-Control": "max-age=0",
 };
 
 export default {
@@ -49,10 +48,8 @@ async function handleRequest(request) {
 
 async function ping(ip, port) {
   try {
-    // ping the ip and port and return latency
 
     const startTime = Date.now();
-    // console.log('Pinging', ip, port);
     //ping by making a request to the ip and port
     const reponse = await fetch(`https://${ip}:${port}`, { headers: heaDer });
 

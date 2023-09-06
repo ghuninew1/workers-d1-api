@@ -1,24 +1,22 @@
 {
   "name": "@ghuninew1/workers-d1-api",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.2",
   "scripts": {
     "deploy": "export NO_D1_WARNING=true && wrangler deploy --minify",
-    "dev": "export NO_D1_WARNING=true && wrangler dev ",
-    "devr": "export NO_D1_WARNING=true && wrangler dev -r ",
+    "dev": "export NO_D1_WARNING=true && wrangler dev",
+    "devr": "export NO_D1_WARNING=true && wrangler dev -r",
     "publish": "export NO_D1_WARNING=true && wrangler publish --minify",
-    "start-stackblitz": "WRANGLER_SEND_METRICS=false wrangler dev index.js --local"
+    "start-stackblitz": "WRANGLER_SEND_METRICS=false wrangler dev src/index.js"
   },
   "description": "",
   "main": "src/index.js",
-  "keywords": [],
-  "author": "",
+  "author": "GhuniNew",
   "license": "ISC",
   "dependencies": {
-    "wrangler": "^3.6.0"
+    "wrangler": "^3.7.0"
   },
   "devDependencies": {
-    "hono": "^3.5.7",
-    "node": "^20.5.1"
+    "hono": "^3.5.8"
   }
 }

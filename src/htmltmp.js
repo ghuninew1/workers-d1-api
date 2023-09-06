@@ -15,10 +15,6 @@ rel="apple-touch-icon"
 type="image/x-icon"
 href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.ico"
 />
-<link
-rel="manifest"
-href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/manifest.json"
-/>
 <title>GhuniNew</title>
 <style>
 *{

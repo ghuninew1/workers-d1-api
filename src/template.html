@@ -14,10 +14,10 @@
       type="image/x-icon"
       href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/favicon.ico"
     />
-    <link
+    <!-- <link
       rel="manifest"
       href="https://raw.githubusercontent.com/ghuninew1/ghuninew1/main/img/manifest.json"
-    />
+    /> -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     
     <title>GhuniNew</title>
@@ -115,22 +115,22 @@
           <p id="date"></p>
         </div>
 
-
         <div id="btconnect">
           <button id="open" class="btn btn-success btn-lg">Connect</button>
           <button id="close" class="btn btn-danger btn-lg">Close</button>
         </div>
 
         <div id="btndb">
+          <div class="d-sm-table-cell">
           <div >
-            <input class="form-control " type="text" id="inputdb" onchange="(e)=>{e.target.value}" />
+            <input class="form-control " type="text" id="inputdb" onchange='(e)=>{e.target.value}' />
           </div>
           <button id="get"class="btn btn-outline-primary" >Get Tb</button>          
           <button id="getdb" class="btn btn-outline-secondary">Get DB</button>
-          <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-            <button id="add"  type="button" class="btn btn-success">Add</button>
-            <button id="update" type="button" class="btn btn-warning">Edit</button>
-            <button id="delete" type="button" class="btn btn-danger">Del</button>
+          <div class="d-inline" >
+            <button id="add"  type="button" class="btn btn-outline-warning">Add</button>
+            <!-- <button id="update" type="button" class="btn btn-warning">Edit</button> -->
+            <button id="cancel" type="button" class="btn btn-outline-danger">Cancel</button>
           </div>
 
           <section id="tabledb">
@@ -138,15 +138,15 @@
             <p id="error" style="color: red"></p>
           </section>
           
-          <button id="cancel" class="btn btn-outline-dark">Reset</button>
-
+          <!-- <button id="cancel" class="btn btn-outline-dark">Cancel</button> -->
+        </div>
         </div>
       </div>
     </main>
     <div class="container-table">
         <table class="table table-responsive-sm table-hover">
           <thead >
-            <tbody id="fromtbody" ></tbody>
+            <!-- <tbody id="fromtbody" ></tbody> -->
             <tbody id="from" ></tbody>
           </thead>
           <tbody id="events"></tbody>
@@ -164,14 +164,11 @@
       const closeId = document.querySelector("#close");
       const getId = document.querySelector("#get");
       const getdbId = document.querySelector("#getdb");
-      const updateId = document.querySelector("#update");
-      const deleteId = document.querySelector("#delete");
       const cancelId = document.querySelector("#cancel");
       const addId = document.querySelector("#add");
       const inputdbId = document.querySelector("#inputdb");
       const tabledbId = document.querySelector("#tabledb");
       const fromId = document.querySelector("#from");
-      const fromtbodyId = document.querySelector("#fromtbody");
       const eventsId = document.querySelector("#events");
       const dataId = document.querySelector("#data");
       const statusId = document.querySelector("#status");
@@ -202,10 +199,6 @@
             const successIds = document.createElement("p");
             successIds.innerText = success;
             tabledbId.appendChild(successIds);
-
-            setTimeout(() => {
-              tabledbId.removeChild(successIds);
-            }, 3000);
           }
 
           if (table) {
@@ -226,55 +219,179 @@
           }
           if (tasks) {
             const itemth = document.createElement("tr");
-            const th = document.createElement("th");
-            const th1 = document.createElement("th");
-            const th2 = document.createElement("th");
-            const th3 = document.createElement("th");
-            const th4 = document.createElement("th");
-            const th5 = document.createElement("th");
-            th.innerText = "id";
-            th1.innerText = "name";
-            th2.innerText = "alt";
-            th3.innerText = "imag";
-            th4.innerText = "post_id";
-            th5.innerText = "update_at";
-            itemth.appendChild(th);
-            itemth.appendChild(th1);
-            itemth.appendChild(th2);
-            itemth.appendChild(th3);
-            itemth.appendChild(th4);
-            itemth.appendChild(th5);
+            if (tasks[0].id) {
+              const th = document.createElement("th");
+              th.innerText = "id";
+              itemth.appendChild(th);
+            }
+            if (tasks[0].name) {
+              const th = document.createElement("th");
+              th.innerText = "name";
+              itemth.appendChild(th);
+            }
+            if (tasks[0].alt || tasks[0].value) {
+              const th = document.createElement("th");
+              th.innerText = tasks[0].alt ? "alt" : "value";
+              itemth.appendChild(th);
+            }
+            if (tasks[0].imag) {
+              const th = document.createElement("th");
+              th.innerText = "imag";
+              itemth.appendChild(th);
+            }
+            if (tasks[0].post_id) {
+              const th = document.createElement("th");
+              th.innerText = "post_id";
+              itemth.appendChild(th);
+            }
+            if (tasks[0].update_at || tasks[0].created_at) {
+              const th = document.createElement("th");
+              const item = document.createElement("th");
+              th.innerText = tasks[0].update_at ? "update_at" : "created_at";
+              item.innerText = "action";
+              itemth.appendChild(th);
+              itemth.appendChild(item);
+            }
+
             fromId.appendChild(itemth);
 
             tasks.forEach((task) => {
+
             const item = document.createElement("tr");
+
+            if (task.id) {
+              const td = document.createElement("td");
+              td.setAttribute("id", "taskid");
+              td.innerText = task.id;
+              item.appendChild(td);
+            }
+            if (task.name) {
+              const td = document.createElement("td");
+              td.setAttribute("id", "taskname"+task.id);
+              td.innerText = task.name;
+              item.appendChild(td);
+            }
+            if (task.alt || task.value) {
+              const td = document.createElement("td");
+              td.setAttribute("id", "taskalt"+task.id);
+              td.innerText = task.alt ? task.alt : task.value;
+              item.appendChild(td);
+            }
+            if (task.imag) {
+              const td = document.createElement("td");
+              td.setAttribute("id", "taskimag"+task.id);
+              td.innerText = task.imag;
+              item.appendChild(td);
+            }
+            if (task.post_id) {
+              const td = document.createElement("td");
+              td.setAttribute("id", "taskpost_id"+task.id);
+              td.innerText = task.post_id;
+              item.appendChild(td);
+            }
+            if (task.update_at || task.created_at) {
+              const td = document.createElement("td");
+              td.setAttribute("id", "taskupdate_at"+task.id);
+              td.innerText = task.update_at ? task.update_at : task.created_at;
+              item.appendChild(td);
+            }
+            const editBtn = document.createElement("button");
+            const deleteBtn = document.createElement("button");
             const td = document.createElement("td");
-            const td1 = document.createElement("td");
-            const td2 = document.createElement("td");
-            const td3 = document.createElement("td");
-            const td4 = document.createElement("td");
-            const td5 = document.createElement("td");
-
-            td.innerText = JSON.stringify(task.id && task.id);
-            td1.innerText = JSON.stringify(task.name && task.name);
-            td2.innerText = JSON.stringify(task.alt && task.alt);
-            td3.innerText = JSON.stringify(task.imag && task.imag);
-            td4.innerText = JSON.stringify(task.post_id && task.post_id);
-            td5.innerText = JSON.stringify(task.update_at && task.update_at);
-
+            td.appendChild(editBtn);
+            td.appendChild(deleteBtn);
             item.appendChild(td);
-            item.appendChild(td1);
-            item.appendChild(td2);
-            item.appendChild(td3);
-            item.appendChild(td4);
-            item.appendChild(td5);
+            editBtn.innerText = "Edit";
+            deleteBtn.innerText = "Delete";
+            editBtn.setAttribute("class", "btn btn-warning");
+            deleteBtn.setAttribute("class", "btn btn-danger");
+            td.style.display = "inline-flex";
+            td.setAttribute("class", "btn-group");
+            item.setAttribute("id", "task"+task.id);
 
             eventsId.appendChild(item);
+
+            editBtn.onclick = () => {
+              tableReset();
+              document.querySelector("#add").style.display = "none";
+              document.querySelector("#cancel").style.display = "inline-block";
+              const itemtr = document.createElement("tr");
+
+              if (task.name) {
+                const td = document.createElement("td");
+                const input = document.createElement("input");
+                input.setAttribute("type", "text");
+                input.setAttribute("id", "name");
+                input.setAttribute("placeholder", "name");
+                input.setAttribute("value", task.name ? task.name : "");
+                input.setAttribute("onchange", "(e)=>{e.target.value}");
+                td.appendChild(input);
+                itemtr.appendChild(td);
+              }
+              if (task.alt || task.value) {
+                const td = document.createElement("td");
+                const input = document.createElement("input");
+                input.setAttribute("type", "text");
+                input.setAttribute("id", "alt");
+                input.setAttribute("placeholder", task.alt ? "alt" : "value");
+                input.setAttribute("value", task.alt ? task.alt : task.value);
+                input.setAttribute("onchange", "(e)=>{e.target.value}");
+                td.appendChild(input);
+                itemtr.appendChild(td);
+              }
+              if (task.imag) {
+                const td = document.createElement("td");
+                const input = document.createElement("input");
+                input.setAttribute("type", "text");
+                input.setAttribute("id", "imag");
+                input.setAttribute("placeholder", "imag");
+                input.setAttribute("value", task.imag ? task.imag : "");
+                input.setAttribute("onchange", "(e)=>{e.target.value}");
+                td.appendChild(input);
+                itemtr.appendChild(td);
+              }
+              if (task.post_id) {
+                const td = document.createElement("td");
+                const input = document.createElement("input");
+                input.setAttribute("type", "text");
+                input.setAttribute("id", "post_id");
+                input.setAttribute("placeholder", "post_id");
+                input.setAttribute("value", task.post_id ? task.post_id : "");
+                input.setAttribute("onchange", "(e)=>{e.target.value}");
+                td.appendChild(input);
+                itemtr.appendChild(td);
+              }
+              if (task.update_at || task.created_at) {
+                const td = document.createElement("td");
+                const upButton = document.createElement("button");
+                upButton.innerText = "Update Now";
+                upButton.setAttribute("class", "btn btn-outline-success");
+                upButton.setAttribute("id", "update_at");
+                td.appendChild(upButton);
+                itemtr.appendChild(td);
+              }
+
+              const upButton = document.querySelector("#update_at");
+
+              fromId.appendChild(itemtr);
+
+              upButton.onclick = () => {
+                updateTable(task.id);
+              }  
+            };
+
+            deleteBtn.onclick = () => {
+
+              console.log("task.id", task.id);
+              if(confirm(`Are you sure you want to delete ${task.id}`)){
+                deleteTable(task.id);
+              }
+            };
           });
-          } 
+        } 
 
           if (error) {
-            setErrorMessage(error);
+            errorId.innerText = error;
           }
         });
 
@@ -288,122 +405,155 @@
       const url = new URL(window.location);
       url.protocol = location.protocol.replace("http", "ws");
       url.pathname = "/ws/";
-      // websocket(url);
-      // const url = "wss://api.bigbrain-studio.com/ws/";
 
+      // websocket(url);
+
+      // const url = "wss://api.ghuninew.workers.dev/ws/";
       
       getId.onclick = () => {
         tableReset();
-        const getdb = document.querySelector("#inputdb").value;
-        ws.send(JSON.stringify({ data: "GET", getdb: getdb }));
+        // const getdb = document.querySelector("#inputdb").value;
+        ws.send(JSON.stringify({ data: "GET"}));
       };
 
       getdbId.onclick = () => {
-        tableReset();
         const getdb = document.querySelector("#inputdb").value;
-        ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
+        if ( getdb !== null || getdb !== undefined || getdb !== "") {
+          tableReset();
+          ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
+        } else {
+          errorId.innerText = "Enter name of database";
+        }
       };
 
-      const createId = () => {
+      const dataRefresh = () => {
         const getdb = document.querySelector("#inputdb").value;
-        const itemth = document.createElement("tr");
-        const fromBodytr = document.createElement("tr");
-        const input = document.createElement("input");
-        const input1 = document.createElement("input");
-        const input2 = document.createElement("input");
-        const input3 = document.createElement("input");
-        const input4 = document.createElement("input");
-        const input5 = document.createElement("span");
-
-        const th = document.createElement("th");
-        const th1 = document.createElement("th");
-        const th2 = document.createElement("th");
-        const th3 = document.createElement("th");
-        const th4 = document.createElement("th");
-        const th5 = document.createElement("th");
-
-        th.innerText = "id";
-        th1.innerText = "name";
-        th2.innerText = "alt";
-        th3.innerText = "imag";
-        th4.innerText = "post_id";
-        th5.innerText = new Date().toLocaleString('th-TH');
-
-        fromBodytr.appendChild(th);
-        fromBodytr.appendChild(th1);
-        fromBodytr.appendChild(th2);
-        fromBodytr.appendChild(th3);
-        fromBodytr.appendChild(th4);
-        fromBodytr.appendChild(th5);
-
-        fromtbodyId.appendChild(fromBodytr);
-
-        const td = document.createElement("td");
-        const td1 = document.createElement("td");
-        const td2 = document.createElement("td");
-        const td3 = document.createElement("td");
-        const td4 = document.createElement("td");
-        const td5 = document.createElement("td");
-
-        itemth.setAttribute("id", "itemth");
-
-        input.setAttribute("type", "number");
-        input.setAttribute("id", "id");
-        input.setAttribute("placeholder", "id");
-        input.setAttribute("onchange", "(e)=>{e.target.value}");
-        input1.setAttribute("type", "text");
-        input1.setAttribute("id", "name");
-        input1.setAttribute("placeholder", "name");
-        input1.setAttribute("onchange", "(e)=>{e.target.value}");
-        input2.setAttribute("type", "text");
-        input2.setAttribute("id", "alt");
-        input2.setAttribute("placeholder", "alt");
-        input2.setAttribute("onchange", "(e)=>{e.target.value}");
-        input3.setAttribute("type", "text");
-        input3.setAttribute("id", "imag");
-        input3.setAttribute("placeholder", "imag");
-        input3.setAttribute("onchange", "(e)=>{e.target.value}");
-        input4.setAttribute("type", "text");
-        input4.setAttribute("id", "post_id");
-        input4.setAttribute("placeholder", "post_id");
-        input4.setAttribute("onchange", "(e)=>{e.target.value}");
-        input5.setAttribute("id", "update_at");
-
-        td.appendChild(input);
-        td1.appendChild(input1);
-        td2.appendChild(input2);
-        td3.appendChild(input3);
-        td4.appendChild(input4);
-        td5.appendChild(input5);
-
-        const tr2 = document.createElement("tr");
-
-        tr2.appendChild(td);
-        tr2.appendChild(td1);
-        tr2.appendChild(td2);
-        tr2.appendChild(td3);
-        tr2.appendChild(td4);
-        tr2.appendChild(td5);
-
-        fromId.appendChild(itemth);
-        fromId.appendChild(tr2);
+        if (getdb !== null || getdb !== undefined || getdb !== "") {
+          ws.send(JSON.stringify({ data: "GETDB", getdb: getdb }));
+        } else {
+          errorId.innerText = "Enter name of database";
+        }
       };
 
-      const clearValue = () => {
-        document.querySelector("#id").value = "";
-        document.querySelector("#name").value = "";
-        document.querySelector("#alt").value = "";
-        document.querySelector("#imag").value = "";
-        document.querySelector("#post_id").value = "";
-        document.querySelector("#cancel").style.display = "none";
-      };
+      addId.onclick = () => {
+        const getdb = document.querySelector("#inputdb").value;
 
-        const addTable = () => {
-          const getdb = document.querySelector("#inputdb").value;
-          const getname = document.querySelector("#name").value;
-          const getalt = document.querySelector("#alt").value;
-          const getimag = document.querySelector("#imag").value;
-          const getpost_id = document.querySelector("#post_id").value;
+        if( getdb === "data") {
+          tableReset();
+          document.querySelector("#add").style.display = "none";
+          document.querySelector("#cancel").style.display = "inline-block";
+
+          const itemth = document.createElement("tr");
+          const input1 = document.createElement("input");
+          const input2 = document.createElement("input");
+          const input3 = document.createElement("input");
+          const input4 = document.createElement("input");
+
+          const td1 = document.createElement("td");
+          const td2 = document.createElement("td");
+          const td3 = document.createElement("td");
+          const td4 = document.createElement("td");
+          const td5 = document.createElement("td");
+
+          itemth.setAttribute("id", "itemth");
+
+          input1.setAttribute("type", "text");
+          input1.setAttribute("id", "dataname");
+          input1.setAttribute("placeholder", "name");
+          input1.setAttribute("onchange", "(e)=>{e.target.value}");
+
+          input2.setAttribute("type", "text");
+          input2.setAttribute("id", "dataalt");
+          input2.setAttribute("placeholder", "alt");
+          input2.setAttribute("onchange", "(e)=>{e.target.value}");
+
+          input3.setAttribute("type", "text");
+          input3.setAttribute("id", "dataimag");
+          input3.setAttribute("placeholder", "imag");
+          input3.setAttribute("onchange", "(e)=>{e.target.value}");
+
+          input4.setAttribute("type", "text");
+          input4.setAttribute("id", "datapost_id");
+          input4.setAttribute("placeholder", "post_id");
+          input4.setAttribute("onchange", "(e)=>{e.target.value}");
+
+          const addbutton = document.createElement("button");
+          addbutton.innerText = "Add Now";
+          addbutton.setAttribute("class", "btn btn-outline-success");
+
+          td1.appendChild(input1);
+          td2.appendChild(input2);
+          td3.appendChild(input3);
+          td4.appendChild(input4);
+          td5.appendChild(addbutton);
+
+          itemth.appendChild(td1);
+          itemth.appendChild(td2);
+          itemth.appendChild(td3);
+          itemth.appendChild(td4);
+          itemth.appendChild(td5);
+
+          fromId.appendChild(itemth);
+
+          addbutton.onclick = () => {
+            addTable();
+          }
+        } 
+        if (getdb === "vist") {
+          tableReset();
+          document.querySelector("#add").style.display = "none";
+          document.querySelector("#cancel").style.display = "inline-block";
+
+          const itemth = document.createElement("tr");
+          const input1 = document.createElement("input");
+          const input2 = document.createElement("input");
+
+          const td1 = document.createElement("td");
+          const td2 = document.createElement("td");
+          const td3 = document.createElement("td");
+
+          input1.setAttribute("type", "text");
+          input1.setAttribute("id", "vistname");
+          input1.setAttribute("placeholder", "name");
+          input1.setAttribute("onchange", "(e)=>{e.target.value}");
+
+          input2.setAttribute("type", "text");
+          input2.setAttribute("id", "vistvalue");
+          input2.setAttribute("placeholder", "value");
+          input2.setAttribute("onchange", "(e)=>{e.target.value}");
+
+          const vistadd = document.createElement("button");
+          vistadd.innerText = "Add Now";
+          vistadd.setAttribute("class", "btn btn-outline-success");
+
+          td1.appendChild(input1);
+          td2.appendChild(input2);
+          td3.appendChild(vistadd);
+
+          itemth.appendChild(td1);
+          itemth.appendChild(td2);
+          itemth.appendChild(td3);
+
+          fromId.appendChild(itemth);
+
+          vistadd.onclick = () => {
+            addTable();
+          }
+        } 
+        else {
+          errorId.innerText = "Enter name of database";
+        }
+      }
+
+      const addTable = () => {
+        const getdb = document.querySelector("#inputdb").value;
+
+        if ( getdb === "data") {
+          const getname = document.querySelector("#dataname").value;
+          const getalt = document.querySelector("#dataalt").value;
+          const getimag = document.querySelector("#dataimag").value;
+          const getpost_id = document.querySelector("#datapost_id").value;
+
           ws.send(
             JSON.stringify({
               data: "CREATE",
@@ -414,29 +564,39 @@
               getpost_id: getpost_id,
             })
           );
-          //clear input value
-          clearValue();
-        };
-
-        addId.onclick = () => {
           tableReset();
-          createId();
-          const button = document.createElement("button");
-          button.setAttribute("id", "addtable");
-          button.innerText = "Add Now";
-          document.querySelector("#update_at").appendChild(button);
-          document.querySelector("#id").setAttribute("disabled", "disabled");
-          button.setAttribute("class", "btn btn-outline-success");
-          document.querySelector("#cancel").style.display = "inline-block";
+          setTimeout(() => {
+            dataRefresh();
+          }, 1000);
+        }
+        if ( getdb === "vist") {
+          const getname = document.querySelector("#vistname").value;
+          const getvalue = document.querySelector("#vistvalue").value;
 
-          button.onclick = () => {
-            addTable();
-          };
-        };
+          ws.send(
+            JSON.stringify({
+              data: "CREATEVIST",
+              getdb: getdb,
+              getname: getname,
+              getvalue: getvalue,
+            })
+          );
+          tableReset();
+          setTimeout(() => {
+            dataRefresh();
+          }, 1000);
+        }
+        else {
+          errorId.innerText = "Enter name of database";
+        }
+      };
         
-        const updateTable = ()=>{
-          const getdb = document.querySelector("#inputdb").value;
-          const getid = document.querySelector("#id").value;
+      const updateTable = async (getid) => {
+        const getdb = document.querySelector("#inputdb").value;
+
+        console.log("getid", getid, "getdb", getdb);
+
+        if ( getdb === "data") {
           const getname = document.querySelector("#name").value;
           const getalt = document.querySelector("#alt").value;
           const getimag = document.querySelector("#imag").value;
@@ -452,87 +612,72 @@
               getpost_id: getpost_id,
             })
           );
-          //clear input value
-          clearValue();
-        };
-
-        updateId.onclick = () => {
           tableReset();
-          createId();
-          const button = document.createElement("button");
-          button.setAttribute("id", "updatetable");
-          button.innerText = "Update Now";
-          document.querySelector("#update_at").appendChild(button);
-          button.setAttribute("class", "btn btn-outline-success");
-          document.querySelector("#cancel").style.display = "inline-block";
-
-          button.onclick = () => {
-            updateTable();
-          };
-        };
-
-        const deleteTable = () => {
-          const getdb = document.querySelector("#inputdb").value;
-          const getid = document.querySelector("#id").value;
+          setTimeout(() => {
+            dataRefresh();
+          }, 1000);
+        }
+        if ( getdb === "vist") {
+          const getname = document.querySelector("#name").value;
+          const getvalue = document.querySelector("#alt").value;
           ws.send(
             JSON.stringify({
-              data: "DELETE",
+              data: "UPDATEVIST",
               getdb: getdb,
               getid: getid,
+              getname: getname,
+              getvalue: getvalue,
             })
           );
-          //clear input value
-          clearValue();
-        };
-
-        deleteId.onclick = () => {
           tableReset();
-          createId();
-          const button = document.createElement("button");
-          button.setAttribute("id", "deletetable");
-          button.innerText = "Delete Now";
-          document.querySelector("#update_at").appendChild(button);
-          document.querySelector("#name").setAttribute("disabled", "disabled");
-          document.querySelector("#alt").setAttribute("disabled", "disabled");
-          document.querySelector("#imag").setAttribute("disabled", "disabled");
-          document.querySelector("#post_id").setAttribute("disabled", "disabled");
-          button.setAttribute("class", "btn btn-outline-success");
-          document.querySelector("#cancel").style.display = "inline-block";
-
-          button.onclick = () => {
-            deleteTable();
-          };
-        };
-
-        const tableReset =()=> {
-
-          document.querySelector("#cancel").style.display = "none";
-
-          if (fromId.childNodes.length > 0) {
-            while (fromId.firstChild) {
-              fromId.removeChild(fromId.firstChild);
-            }
-          }
-          if (fromtbodyId.childNodes.length > 0) {
-            while (fromtbodyId.firstChild) {
-              fromtbodyId.removeChild(fromtbodyId.firstChild);
-            }
-          }
-          if (eventsId.childNodes.length > 0) {
-            while (eventsId.firstChild) {
-              eventsId.removeChild(eventsId.firstChild);
-            }
-          }
-          if (tabledbId.childNodes.length > 0) {
-            while (tabledbId.firstChild) {
-              tabledbId.removeChild(tabledbId.firstChild);
-            }
-          } 
+          setTimeout(() => {
+            dataRefresh();
+          }, 1000);
         }
 
-        cancelId.onclick = () => {
-          tableReset();
-        };
+      };
+
+      const deleteTable = async (getid) => {
+        const getdb = document.querySelector("#inputdb").value;
+        console.log("getid", getid, "getdb", getdb);
+        ws.send(
+          JSON.stringify({
+            data: "DELETE",
+            getdb: getdb,
+            getid: getid,
+          })
+        );
+        tableReset();
+        setTimeout(() => {
+          dataRefresh();
+        }, 1000);
+      };
+
+      const tableReset =()=> {
+        if (fromId.childNodes.length > 0) {
+          while (fromId.firstChild) {
+            fromId.removeChild(fromId.firstChild);
+          }
+        }
+        if (eventsId.childNodes.length > 0) {
+          while (eventsId.firstChild) {
+            eventsId.removeChild(eventsId.firstChild);
+          }
+        }
+        if (tabledbId.childNodes.length > 0) {
+          while (tabledbId.firstChild) {
+            tabledbId.removeChild(tabledbId.firstChild);
+          }
+        } 
+      }
+
+      cancelId.onclick = () => {
+        tableReset();
+        dataRefresh();
+        // document.querySelector("#inputdb").value = "";
+        document.querySelector("#cancel").style.display = "none";
+        document.querySelector("#add").style.display = "inline-block";
+      };
 
       //websocket reconnect
       openId.onclick = () => {
@@ -555,11 +700,10 @@
         statusId.classList.add("online");
         statusId.classList.remove("offline");
         statusId.classList.remove("text-danger");
-        btndbId.style.display = "inline-block";
-        // btndbId.style.flexDirection = "column";
+        btndbId.style.display = "inline-flex";
         dateId.innerText = new Date().toLocaleString('th-TH');
         btconnectId.classList.add("bbtn");
-        closeId.style.display = "inline-block";
+        closeId.style.display = "inline-flex";
         openId.style.display = "none";
         inputdbId.setAttribute("placeholder", "Search DB");
       }
@@ -578,12 +722,14 @@
         tabledbId.innerText = "";
         btndbId.style.display = "none";
         closeId.style.display = "none";
-        openId.style.display = "inline-block";
+        openId.style.display = "inline-flex";
+        inputdbId.value = "";
       }
 
-      const setErrorMessage = (message) => {
-        errorId.innerHTML = message ? message : "";
-      };
+      // const setErrorMessage = (message) => {
+      //   errorId.innerText = message ? message : "";
+      // };
+
     </script>
   </body>
 </html>

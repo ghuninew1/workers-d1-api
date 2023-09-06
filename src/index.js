@@ -4,22 +4,19 @@ import { cors } from "hono/cors";
 import { etag } from "hono/etag";
 import ping from "./ping";
 import template from "./template.html";
-import {htmltmp} from "./htmltmp";
+import { htmltmp } from "./htmltmp";
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env) {
     const app = new Hono();
 
-    
     // Mount Builtin Middlewar
     app.use(etag()), cors({ origin: "*" });
 
     app.use("*", async (c, next) => {
       const timeStart = Date.now();
       await next();
-      const timeEnd = Date.now();
-      const time = timeEnd - timeStart;
-      c.res.headers.set("X-Response-Time", `${time}ms`);
+      c.res.headers.set("X-Response-Time", `${Date.now() - timeStart} ms`);
       c.res.headers.set("Access-Allow-Origin", "*");
       c.res.headers.set("X-powered-By", `GhuniNew`);
     });
@@ -28,9 +25,9 @@ export default {
 
     app.get("/ws", async (c) => c.html(template));
 
-    app.get("/ws/", async (c) => websocketHandler(request, env));
+    app.get("/ws/", async () => await websocketHandler(request, env));
 
-    app.get("/ping", async (c) => await ping.fetch(request, env, ctx));
+    app.get("/ping", async () => await ping.fetch(request));
 
     app.get("/ip/:ip", async (c) => {
       const { ip } = c.req.param();
@@ -48,21 +45,18 @@ export default {
     app.get("/api/", async (c) => await c.redirect("/api"));
 
     app.get("/api", async (c) => {
-      const { results } = await env.DB.prepare(
-        `select * from sqlite_master where type = 'table';`
-      ).all();
+      const { results } = await env.DB.prepare(`select * from sqlite_master where type = 'table';`).all();
       const tasks = results || [];
       return c.json(tasks);
     });
 
     app.get("/api/:db_name", async (c) => {
       const { db_name } = c.req.param();
-      const { results } = await env.DB.prepare(`SELECT * FROM ${db_name};`)
-        .bind()
-        .run();
+      const { results } = await env.DB.prepare(`SELECT * FROM ${db_name};`).bind().run();
       const tasks = results || [];
       return c.json(tasks);
     });
+
     app.get("/api/:db_name/", (c) => {
       const { db_name } = c.req.param();
       return c.redirect(`/api/${db_name}`);
@@ -71,11 +65,8 @@ export default {
     app.post("/api/:db_name/p", async (c) => {
       const { db_name } = c.req.param();
       const { name, alt, imag, post_id } = await c.req.json();
-      const { results } = await env.DB.prepare(
-        `INSERT INTO ${db_name} (name, alt, imag, post_id) VALUES (?, ?, ?, ?);`
-      )
-        .bind(name, alt, imag, post_id)
-        .run();
+      const { results } = await env.DB.prepare(`INSERT INTO ${db_name} (name, alt, imag, post_id) VALUES (?, ?, ?, ?);`)
+        .bind(name, alt, imag, post_id).run();
       const tasks = results || [];
         return c.json({ message: `${db_name} is added ${tasks}` });
     });
@@ -83,14 +74,11 @@ export default {
     app.get("/api/:db_name/:id", async (c) => {
       const { db_name } = c.req.param();
       const taskId = c.req.param("id");
-      const { results } = await env.DB.prepare(
-        `SELECT * FROM ${db_name} WHERE id = ?;`
-      )
-        .bind(taskId)
-        .run();
+      const { results } = await env.DB.prepare(`SELECT * FROM ${db_name} WHERE id = ?;`).bind(taskId).run();
       const tasks = results || [];
       return c.json(tasks);
     });
+    
     app.get("/api/:db_name/:id/", (c) => {
       const { db_name } = c.req.param();
       const taskId = c.req.param("id");
@@ -103,8 +91,7 @@ export default {
       const { name, alt, imag, post_id } = await c.req.json();
       if (taskId) {
         await env.DB.prepare(`UPDATE ${db_name} SET name = ?, alt = ?, imag = ?, post_id = ? WHERE id = ?;`)
-          .bind(name, alt, imag, post_id, taskId)
-          .run();
+          .bind(name, alt, imag, post_id, taskId).run();
         return c.json({ message: `${taskId} is updated` });
       } else {
         return c.json({ message: `id is not updated` });
@@ -115,9 +102,7 @@ export default {
       const { db_name } = c.req.param();
       const taskId = c.req.param("id");
       if (taskId) {
-        await env.DB.prepare(`DELETE FROM ${db_name} WHERE id = ?;`)
-          .bind(taskId)
-          .run();
+        await env.DB.prepare(`DELETE FROM ${db_name} WHERE id = ?;`).bind(taskId).run();
         return c.json({ message: `${taskId} is deleted` });
       } else {
         return c.json({ message: `id is not deleted` });
