@@ -17,6 +17,7 @@
     "wrangler": "^3.7.0"
   },
   "devDependencies": {
-    "hono": "^3.5.8"
+    "hono": "^3.5.8",
+    "util": "^0.12.5"
   }
 }

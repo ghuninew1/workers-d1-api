@@ -5,6 +5,7 @@ import { etag } from "hono/etag";
 import ping from "./ping";
 import template from "./template.html";
 import { htmltmp } from "./htmltmp";
+import util from 'util';
 
 export default {
   async fetch(request, env) {
@@ -14,11 +15,10 @@ export default {
     app.use(etag()), cors({ origin: "*" });
 
     app.use("*", async (c, next) => {
-      const timeStart = Date.now();
       await next();
-      c.res.headers.set("X-Response-Time", `${Date.now() - timeStart} ms`);
       c.res.headers.set("Access-Allow-Origin", "*");
       c.res.headers.set("X-powered-By", `GhuniNew`);
+      c.res.headers.set("Cache-Control", `public, max-age=0`);
     });
 
     app.get("/", async (c) => c.html(htmltmp(request)));
