@@ -5,7 +5,6 @@ import { etag } from "hono/etag";
 import ping from "./ping";
 import template from "./template.html";
 import { htmltmp } from "./htmltmp";
-import util from 'util';
 
 export default {
   async fetch(request, env) {
